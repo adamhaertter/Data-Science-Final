@@ -1,0 +1,18 @@
+---
+title: "Data Science 1 - Final Project Proposal"
+author: "Adam Haertter & Brennan Mulligan"
+format: pdf
+editor: visual
+---
+
+### Proposal
+
+Your proposal is to be submitted in print. Spend time deciding on a topic that interests you. Think about compelling questions that can be answered with data. Once you have an idea of the data out there, try to picture your end product. What type of visualizations, tables, and/or statistical methods would be helpful. Don't think about coding, a particular dataset, or what you know how to do at first. This will increase the likelihood that you will come up with something ambitious and original, and you will be more motivated to learn new things as you work to accomplish your goal. The topic is completely open to your choice, but keep in mind the rules listed above.
+
+Your proposal should contain the following content:
+
+-   **Title**: The title of your project
+-   **Purpose**: Describe the general topic/phenomenon you want to explore, as well some carefully considered questions that you hope to address. You should make an argument motivating your work. Why should someone be interested in what you are doing? What do you hope people will learn from your project?
+-   **Data**: As best you can, describe where you will find your data, and what kind of data it is. Where will you be accessing your data? Be as specific as you can, listing URLs and file formats if possible.
+-   **Variables**: As best you can, list and briefly describe each variable that you plan to incorporate. Be specific about units, scale, etc. where possible.
+-   **End Product**: Describe what you hope to deliver as a final product. What type of visualizations, tables, and/or output from statistical methods are you aiming for?
