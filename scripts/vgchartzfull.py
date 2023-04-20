@@ -1,7 +1,13 @@
+# Original script from: https://github.com/GregorUT/vgchartzScrape
+# License: GNU General Public License v3.0
+# Modified for our usage in 2023
+
 from bs4 import BeautifulSoup, element
-import urllib
+import urllib.request
 import pandas as pd
 import numpy as np
+import requests
+import time
 
 pages = 19
 rec_count = 0
@@ -36,13 +42,19 @@ for page in range(1, pages):
     # vgchartz website is really weird so we have to search for
     # <a> tags with game urls
     game_tags = list(filter(
-        lambda x: x.attrs['href'].startswith('http://www.vgchartz.com/game/'),
+        lambda x: x.get('href', '').startswith('https://www.vgchartz.com/game/'),
         # discard the first 10 elements because those
         # links are in the navigation bar
         soup.find_all("a")
     ))[10:]
 
     for tag in game_tags:
+        
+        response = requests.get(surl)
+
+        if response.status_code == 429:
+            print("429 - waiting...")
+            time.sleep(int(response.headers["Retry-After"]))
 
         # add name to list
         gname.append(" ".join(tag.string.split()))
