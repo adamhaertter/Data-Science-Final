@@ -56,7 +56,7 @@ for genre in genres:
 
     output = "data/raw/" + genre.replace(' ', '_') + '.csv'
     print("Writing to file " + output)
-    with open(output, 'w', newline='') as file:
+    with open(output, 'w', encoding='utf-8', newline='') as file:
         writer = csv.writer(file)
         writer.writerows(data)
 
