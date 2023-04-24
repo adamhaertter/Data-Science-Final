@@ -1,4 +1,7 @@
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 import csv
@@ -21,14 +24,27 @@ for genre in genres:
     print("Connecting to VGChartz Page for " + genre)
     url = url1 + genre.replace(' ', '+') + url2
     driver.get(url)
-    driver.implicitly_wait(30)
+    #driver.implicitly_wait(30)
     print("Driver got page content")
 
-    html_content = driver.page_source
-    print("Starting soup parser")
-    soup = BeautifulSoup(html_content, 'html.parser')
-    table = soup.find('table')
-    rows = table.find_all('tr')
+    # html_content = driver.page_source
+    # print("Starting soup parser")
+    # soup = BeautifulSoup(html_content, 'html.parser')
+    # table = soup.find('table')
+
+    # Wait for the table element to be present
+    table_xpath = '/html/body/div[4]/div/div[2]/table/tbody/tr/td/div/div[2]/table[1]'  # Replace with the XPath of your table
+    table_element = WebDriverWait(driver, 30).until(
+        EC.presence_of_element_located((By.XPATH, table_xpath))
+    )
+
+    # Get the outerHTML of the table element
+    table_html = table_element.get_attribute('outerHTML')
+
+    # Parse the HTML using BeautifulSoup
+    soup = BeautifulSoup(table_html, 'html.parser')
+
+    rows = soup.find_all('tr')
 
     print("Building data array from page...")
 
