@@ -11,8 +11,17 @@ Your proposal is to be submitted in print. Spend time deciding on a topic that i
 
 Your proposal should contain the following content:
 
--   **Title**: The title of your project
--   **Purpose**: Describe the general topic/phenomenon you want to explore, as well some carefully considered questions that you hope to address. You should make an argument motivating your work. Why should someone be interested in what you are doing? What do you hope people will learn from your project?
--   **Data**: As best you can, describe where you will find your data, and what kind of data it is. Where will you be accessing your data? Be as specific as you can, listing URLs and file formats if possible.
--   **Variables**: As best you can, list and briefly describe each variable that you plan to incorporate. Be specific about units, scale, etc. where possible.
--   **End Product**: Describe what you hope to deliver as a final product. What type of visualizations, tables, and/or output from statistical methods are you aiming for?
+-   **Title**: A Statistical Analysis on How Genre Affects the Video Game Sales Market
+-   **Purpose**: We would like to look into this list that shows the amount of sales by video games and video game series. We want to see how each genre affects the amount of sales. Further analysis can be done by seeing how certain developers produce more for a certain genre and comparing that to what genre of theirs makes the most sales. Publishers may find this information interesting when considering ideas for their next game to see what may be profitable. Specific publishers that we cover may also find it interesting to see if the genre they make the most games for is also the one that makes the most money by game/franchise. 
+-   **Data**: We will be taking data from
+
+https://www.vgchartz.com/games/games.php?name=&keyword=&console=&region=All&developer=&publisher=&goty_year=&genre=&boxart=Both&banner=Both&ownership=Both&showmultiplat=No&results=100000&order=Sales&showtotalsales=1&showpublisher=1&showvgchartzscore=1&shownasales=1&showdeveloper=1&showcriticscore=1&showpalsales=1&showreleasedate=1&showuserscore=1&showjapansales=1&showlastupdate=1&showothersales=1&showshipped=1
+
+and scraping it using R, making it tidy, and putting it inside of a data frame so that we can access, analyze, and filter the data for our purposes. We want as much information as possible from the database from the results that the query provides us. It contains columns such as game/franchise names, publishers, amount of units sold by region/overall, and genre.
+-   **Variables**: Game Name: Strings of the name of the game or franchise
+Publisher/Developer: Strings of the publisher or developer of the game
+Amount of Units Sold: The amount of units in millions that said game has shipped. This includes amounts from specific regions and the overall amount.
+Genre: Strings of the genre of the game
+Release Date: The date of the release of the game
+
+-   **End Product**: We are producing a graph of the amount of units shipped per genre to compare what is most popular. This will be for a general amount of developers to understand what the market seems to favor. We also want to have a graph that compares amount of units shipped per genre by specific publishers. Then, we want to compare that to the amount of games that the publisher has created by genre. We will provide advice to specific publishers based on what seems to be the most profitable for them.
