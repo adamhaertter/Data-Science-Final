@@ -4,16 +4,61 @@ author: "Adam Haertter & Brennan Mulligan"
 format: html
 ---
 
-## Quarto
+```{r lib}
+#| message: false
+#| echo: false
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+library("tidyverse")
+library("rvest")
+library("magrittr")
+```
 
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+## Scraping
 
 ```{r}
-1 + 1
+#link <- "https://www.vgchartz.com/games/games.php?name=&keyword=&console=&region=All&developer=&publisher=&goty_year=&genre=&boxart=Both&banner=Both&ownership=Both&showmultiplat=No&results=100000&order=Sales&showtotalsales=1&showpublisher=1&showvgchartzscore=1&shownasales=1&showdeveloper=1&showcriticscore=1&showpalsales=1&showreleasedate=1&showuserscore=1&showjapansales=1&showlastupdate=1&showothersales=1&showshipped=1"
+
+action_query <- "https://www.vgchartz.com/games/games.php?name=&keyword=&console=&region=All&developer=&publisher=&goty_year=&genre=Action&boxart=Both&banner=Both&ownership=Both&showmultiplat=No&results=10000&order=Sales&showtotalsales=1&showpublisher=1&showvgchartzscore=0&showvgchartzscore=1shownasales=1&showdeveloper=1&showcriticscore=1&showpalsales=1&showreleasedate=1&showuserscore=1&showjapansales=1&showlastupdate=1&showothersales=1&showshipped=1"
+action_adv_query <- "https://www.vgchartz.com/games/games.php?name=&keyword=&console=&region=All&developer=&publisher=&goty_year=&genre=Action-Adventure&boxart=Both&banner=Both&ownership=Both&showmultiplat=No&results=10000&order=Sales&showtotalsales=1&showpublisher=1&showvgchartzscore=0&showvgchartzscore=1shownasales=1&showdeveloper=1&showcriticscore=1&showpalsales=1&showreleasedate=1&showuserscore=1&showjapansales=1&showlastupdate=1&showothersales=1&showshipped=1"
+
+
+scraper <- function(genre) {
+  url <- paste("https://www.vgchartz.com/games/games.php?name=&keyword=&console=&region=All&developer=&publisher=&goty_year=&genre=", genre, "&boxart=Both&banner=Both&ownership=Both&showmultiplat=No&results=10000&order=Sales&showtotalsales=1&showpublisher=1&showvgchartzscore=0&showvgchartzscore=1shownasales=1&showdeveloper=1&showcriticscore=1&showpalsales=1&showreleasedate=1&showuserscore=1&showjapansales=1&showlastupdate=1&showothersales=1&showshipped=1", sep = "") 
+  table <- url %>%
+    read_html() %>%
+    html_nodes(xpath = "/html/body/div[4]/div/div[2]/table") %>%
+    html_table()
+  output <- table#[[1]]
+  output
+}
+
+#table <- link %>% read_html() %>% html_nodes("/html/body/div[4]/div/div[2]/table") %>% html_table() %>% .[[1]]
+
+action <- scraper("Action")
+```
+# Tidying Data
+```{r}
+genres <- c("Action", "Action-Adventure", "Adventure", "Board Game", "Education", "Fighting", "Misc", "MMO", "Music", "Party", "Platform", "Puzzle", "Racing", "Role-Playing", "Sandbox", "Shooter", "Simulation", "Sports", "Strategy", "Visual Novel")
+
+load_add_genre <- function(genre) {
+  path <- paste("data/raw/", genre %>% str_replace_all(" ", "_"), ".csv", sep = "")
+  readfile <- read.csv(path, skip = 2) %>%
+    mutate("Genre" = genre) %>%
+    subset(select = -`Box.Art`)
+  readfile
+}
+
+master <- tibble()
+for(genre in genres) {
+  raw_list <- genre %>% load_add_genre()
+  master %<>% bind_rows(raw_list)
+}
+
+master %>% group_by(Genre) %>% summarize("Ct" = max(Pos))
+
+#readfile <- read.csv("data/raw/Action.csv", skip = 2)
+
+action = load_add_genre("Action")
 ```
 
 You can add options to executable code like this 
