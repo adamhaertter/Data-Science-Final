@@ -4,50 +4,26 @@ author: "Adam Haertter & Brennan Mulligan"
 format: html
 ---
 
-```{r lib}
-#| message: false
-#| echo: false
+# Initial Steps
 
-library("tidyverse")
-library("rvest")
-library("magrittr")
-```
+## Scraping Data
 
-## Scraping
+See our [Python scraper](scripts/scrape_vgchartz.py). VGChartz renders its data through a JavaScript table, so the data itself is not accessible through the native HTML for R scraping.
 
-```{r}
-#link <- "https://www.vgchartz.com/games/games.php?name=&keyword=&console=&region=All&developer=&publisher=&goty_year=&genre=&boxart=Both&banner=Both&ownership=Both&showmultiplat=No&results=100000&order=Sales&showtotalsales=1&showpublisher=1&showvgchartzscore=1&shownasales=1&showdeveloper=1&showcriticscore=1&showpalsales=1&showreleasedate=1&showuserscore=1&showjapansales=1&showlastupdate=1&showothersales=1&showshipped=1"
+## Wrangling Data
 
-action_query <- "https://www.vgchartz.com/games/games.php?name=&keyword=&console=&region=All&developer=&publisher=&goty_year=&genre=Action&boxart=Both&banner=Both&ownership=Both&showmultiplat=No&results=10000&order=Sales&showtotalsales=1&showpublisher=1&showvgchartzscore=0&showvgchartzscore=1shownasales=1&showdeveloper=1&showcriticscore=1&showpalsales=1&showreleasedate=1&showuserscore=1&showjapansales=1&showlastupdate=1&showothersales=1&showshipped=1"
-action_adv_query <- "https://www.vgchartz.com/games/games.php?name=&keyword=&console=&region=All&developer=&publisher=&goty_year=&genre=Action-Adventure&boxart=Both&banner=Both&ownership=Both&showmultiplat=No&results=10000&order=Sales&showtotalsales=1&showpublisher=1&showvgchartzscore=0&showvgchartzscore=1shownasales=1&showdeveloper=1&showcriticscore=1&showpalsales=1&showreleasedate=1&showuserscore=1&showjapansales=1&showlastupdate=1&showothersales=1&showshipped=1"
+See [wrangle_data.R](scripts/wrangle_data.R).
 
+## Loading Data into Environment
 
-scraper <- function(genre) {
-  url <- paste("https://www.vgchartz.com/games/games.php?name=&keyword=&console=&region=All&developer=&publisher=&goty_year=&genre=", genre, "&boxart=Both&banner=Both&ownership=Both&showmultiplat=No&results=10000&order=Sales&showtotalsales=1&showpublisher=1&showvgchartzscore=0&showvgchartzscore=1shownasales=1&showdeveloper=1&showcriticscore=1&showpalsales=1&showreleasedate=1&showuserscore=1&showjapansales=1&showlastupdate=1&showothersales=1&showshipped=1", sep = "") 
-  table <- url %>%
-    read_html() %>%
-    html_nodes(xpath = "/html/body/div[4]/div/div[2]/table") %>%
-    html_table()
-  output <- table#[[1]]
-  output
-}
-
-#table <- link %>% read_html() %>% html_nodes("/html/body/div[4]/div/div[2]/table") %>% html_table() %>% .[[1]]
-
-action <- scraper("Action")
-```
-
-# Loading Data
-
-See wrangle_data.R script for data wrangling
+Rerun this if you need to reset the master table. The dataframe with all info is called `master`
 
 ```{r}
 load(file = here("data", "wrangled", "wrangled_data.rda"))
 ```
 
+# Data Analysis
 
 ```{r}
 
 ```
-
-
