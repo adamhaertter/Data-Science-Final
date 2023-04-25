@@ -14,6 +14,12 @@ See our [Python scraper](scripts/scrape_vgchartz.py). VGChartz renders its data 
 
 See [wrangle_data.R](scripts/wrangle_data.R).
 
+> You shouldn't need to run this line unless the `data/wrangled/` dir is empty.
+
+```{r}
+source("scripts/wrangle_data.R")
+```
+
 ## Loading Data into Environment
 
 Rerun this if you need to reset the master table. The dataframe with all info is called `master`
