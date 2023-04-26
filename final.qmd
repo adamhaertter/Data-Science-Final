@@ -6,6 +6,16 @@ format: html
 
 # Initial Steps
 
+```{r lib}
+#| message: false
+#| echo: false
+
+library("tidyverse")
+library("rvest")
+library("magrittr")
+library("here")
+```
+
 ## Scraping Data
 
 See our [Python scraper](scripts/scrape_vgchartz.py). VGChartz renders its data through a JavaScript table, so the data itself is not accessible through the native HTML for R scraping.
@@ -30,6 +40,13 @@ load(file = here("data", "wrangled", "wrangled_data.rda"))
 
 # Data Analysis
 
-```{r}
+Most popular genres by publisher.
 
+```{r}
+#master %>% group_by(Publisher, Genre) %>% 
+#  summarize("sum" = sum(Total.Sales)) %>% 
+#  drop_na() %>% arrange(sum) %>%
+#  filter(sum > 0.00) 
+
+publishers <- master[, c(2,5,7)] %>% drop_na() %>% group_by(Publisher) %>% summarize("Sum.Sales" = sum(Total.Sales)) %>% arrange(Publisher)
 ```
