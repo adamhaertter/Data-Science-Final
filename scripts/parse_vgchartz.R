@@ -51,19 +51,26 @@ clean_names <- function(names) {
     str_replace_all("2K Sports", "2K Games") %>%
     str_replace_all("989 Sports", "989 Studios") %>%
     # ASCII Media Works merger
-    str_replace_all("ASCII Entertainment", "ASCII Media Works") %>%
     str_replace_all("Media Works", "ASCII Media Works") %>%
-    # Activision subsidiaries
+    str_replace_all("ASCII Entertainment", "ASCII Media Works") %>%
+    str_replace_all("ASCII ASCII Media Works", "ASCII Media Works") %>%
+    # Activision Blizzard merger
     str_replace_all("Activision Blizzard", "Activision") %>%
     str_replace_all("Activision Value", "Activision") %>%
+    str_replace_all("Blizzard Entertainment", "Activision") %>%
+    str_replace_all("Activision", "Activision Blizzard") %>% # Set back to merger
     # Bandai Namco merger
     str_replace_all("Bandai Namco Entertainment", "Bandai Namco") %>%
     str_replace_all("Bandai Namco Games", "Bandai Namco") %>%
     str_replace_all("Bandai Visual", "Bandai Namco") %>%
-    str_replace_all("Namco", "Bandai Namco") %>%
-    str_replace_all("Namco Bandai", "Bandai Namco") %>%
     str_replace_all("Namco Bandai Games", "Bandai Namco") %>%
+    str_replace_all("Namco Bandai", "Bandai Namco") %>%
     str_replace_all("Namco Networks America Inc.", "Bandai Namco") %>%
+    str_replace_all("Namco", "Bandai Namco") %>%
+    str_replace_all("Bandai", "Bandai Namco") %>%
+    str_replace_all("Bandai Bandai Namco", "Bandai Namco") %>% # Cleanup
+    str_replace_all("Bandai Namco Namco", "Bandai Namco") %>%
+    str_replace_all("Bandai Namco Bandai Namco", "Bandai Namco") %>%
     # More solos
     str_replace_all("CD Projekt Red Studio", "CD Projekt Red") %>%
     str_replace_all("Capcom Entertainment", "Capcom") %>%
@@ -74,13 +81,14 @@ clean_names <- function(names) {
     str_replace_all("Eidos Interactive Ltd", "Eidos Interactive") %>%
     str_replace_all("Excalibur Publishing Limited", "Excalibur Publishing") %>%
     # EA subsidiaries
-    str_replace_all("EA Sports", "Electronic Arts") %>%
     str_replace_all("EA Sports BIG", "Electronic Arts") %>%
+    str_replace_all("EA Sports", "Electronic Arts") %>%
     # Nihon Falcom 
     str_replace_all("Falcom", "Nihon Falcom") %>%
+    str_replace_all("Nihon Falcom Corporation", "Nihon Falcom") %>%
     str_replace_all("Falcom Corporation", "Nihon Falcom") %>%
     str_replace_all("Nihon Falcom Corp", "Nihon Falcom") %>%
-    str_replace_all("Nihon Falcom Corporation", "Nihon Falcom") %>%
+    str_replace_all("Nihon Nihon Falcom", "Nihon Falcom") %>%
     # Focus
     str_replace_all("Focus Home Interactive", "Focus") %>%
     str_replace_all("Focus Multimedia", "Focus") %>%
@@ -158,9 +166,11 @@ clean_names <- function(names) {
     str_replace_all("SouthPeak Interactive", "SouthPeak Games") %>%
     # Spike Chunsoft merger
     str_replace_all("Chunsoft", "Spike Chunsoft") %>%
+    str_replace_all("ChunSoft", "Spike Chunsoft") %>%
     str_replace_all("Spike", "Spike Chunsoft") %>%
     str_replace_all("Spike Spike Chunsoft", "Spike Chunsoft") %>%
     str_replace_all("Spike Chunsoft Chunsoft", "Spike Chunsoft") %>%
+    str_replace_all("Spike Chunsoft Spike Chunsoft", "Spike Chunsoft") %>%
     # Square Enix merger
     str_replace_all("Square EA", "Square Enix") %>%
     str_replace_all("SquareSoft", "Square Enix") %>%
@@ -169,6 +179,7 @@ clean_names <- function(names) {
     str_replace_all("Square", "Square Enix") %>%
     str_replace_all("Square Square Enix", "Square Enix") %>%
     str_replace_all("Square Enix Enix", "Square Enix") %>%
+    str_replace_all("Square Enix Square Enix", "Square Enix") %>%
     str_replace_all("Summitsoft Entertainment", "Summitsoft") %>%
     str_replace_all("System 3 Arcade Software", "System 3") %>%
     # System Soft
