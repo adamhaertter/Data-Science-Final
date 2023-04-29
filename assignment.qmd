@@ -1,5 +1,7 @@
 ---
-format: html
+title: "Data Science 1 - Final Project"
+author: "Adam Haertter & Brennan Mulligan"
+format: pdf
 editor: visual
 ---
 
