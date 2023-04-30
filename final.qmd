@@ -113,18 +113,29 @@ genre_counter <- data.frame(Sales = integer(), Genre = character(),
                             stringsAsFactors = FALSE)
 publisher_size <- length(publishers_by_sales$Publisher.Simple)
 for(i in 1:publisher_size) {
+  this_pub <- publisher_by_genre(publishers_by_sales$Publisher.Simple[i])
   genre_counter <- 
     data.frame(lapply(genre_counter,as.character),stringsAsFactors = FALSE)
   genre_counter <- 
-    rbind(genre_counter,c(publisher_by_genre(publishers_by_sales$Publisher.Simple[i])$Genre[1], publisher_by_genre(publishers_by_sales$Publisher.Simple[i])$Sum.Sales[1]))
+    rbind(genre_counter,c(this_pub$Genre[1],
+                          this_pub$Sum.Sales[1]))
 }
 
 colnames(genre_counter) <- c("Genre", "Sales")
-genre_counter %<>% drop_na()
+genre_counter %<>% drop_na() %>%
+  group_by(Genre) %>%
+  mutate("count" = n()) %>%
+  .[, c(1,3)] %>% unique()
 
-ggplot(genre_counter, aes(x = Genre, y = Sales, fill = Genre)) +
-  geom_bar(stat = "identity") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  labs(x = "Genre", y = "Amount of Publishers", title = "Highest Selling Genres By Publisher") +
+ggplot(genre_counter, aes(x = reorder(Genre, -count), y = count, fill = Genre)) +
+  geom_bar(stat = "identity") + 
+  geom_text(aes(label = count), stat = "identity", vjust = -.5, color = "black") +
+  scale_y_continuous(limits = c(0, 150)) +
+  theme(plot.title = element_text(hjust = 0.5), 
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(x = "Genre", 
+       y = "Number of Publishers", 
+       title = "Publishers' Most-Produced Genres") +
   scale_fill_manual(values = colorscale, guide = "none")
 ```
 
