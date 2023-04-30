@@ -141,7 +141,7 @@ theme_set(theme_classic())
 console_by_publisher_sales <- master %>% 
   group_by(Console, Publisher.Simple) %>% .[, c("Console", "Publisher.Simple", "Total.Sales")] %>%
   drop_na() %>% 
-  filter(Publisher.Simple %in% c("Nintendo", "Electronic Arts", "Activision Blizzard", "Sony", "Ubisoft", "Bandai Namco", "THQ", "Sega", "Square Enix", "Konami")) %>% # Top 10 publishers
+  filter(Publisher.Simple %in% c("Nintendo", "Electronic Arts", "Activision Blizzard", "Sony", "Ubisoft", "Bandai Namco", "THQ", "Sega", "Square Enix", "Konami", "Microsoft", "Capcom", "Rockstar Games", "Warner Bros", "2K Games")) %>% # Top 15 publishers
   filter(Console %in% c("PC", "XB", "PS2", "DS", "3DS", "Wii", "NS", "PS3", "PS4", "PS5", "X360", "XOne", "XS", "PSP", "WiiU", "And", "Mobile")) %>%
   summarize("Sum.Sales" = sum(Total.Sales), .groups = "drop") %>% ungroup() %>% complete(Console, Publisher.Simple, fill = list(Sum.Sales = 0)) %>% 
   replace_na(list(Sum.Sales = 0)) 
