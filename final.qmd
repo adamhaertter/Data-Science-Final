@@ -48,10 +48,10 @@ Most popular genres by publisher.
 #  drop_na() %>% arrange(sum) %>%
 #  filter(sum > 0.00) 
 
-publishers <- master[, c(3,5,8)]  %>% drop_na() %>%
+publishers_by_sales <- master[, c(3,5,8)]  %>% drop_na() %>%
   group_by(Publisher.Simple) %>% summarize("Sum.Sales" = sum(Total.Sales)) %>% arrange(desc(Sum.Sales))
 
-# It appears our biggest publishers are Nintendo, Electronic Arts, Activision, Ubisoft, and Sony
+# It appears our biggest publishers are Nintendo, Electronic Arts, Activision Blizzard, Ubisoft, and Sony
 # Since they are our most successful companies, let's look into what genre is their most successful by sales
 
 publisher_by_genre <- function(publisher) {
@@ -63,17 +63,46 @@ publisher_by_genre <- function(publisher) {
 
 sales_by_genre_plot <- function(publisher) {
   ggplot(publisher_by_genre(publisher), aes(x = reorder(Genre, -Sum.Sales), y = Sum.Sales, fill = Genre)) + geom_bar(stat = "identity", position = position_dodge()) + theme(plot.title = element_text(hjust = 0.5),
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) + labs(x = "Genre", y = "Sales", title = paste(publisher, " Sales By Genre"))
-}
-
-pub_by_genre_plot <- function(publisher) {
-  ggplot(publisher_by_genre(publisher), aes(x = reorder(Publisher.Simple, -Sum.Sales), y = Sum.Sales, fill = Publisher.Simple)) + geom_bar(stat = "identity", position = position_dodge()) + theme(plot.title = element_text(hjust = 0.5),
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) + labs(x = "Genre", y = "Sales", title = paste(publisher, "'s Most Developed Genre"))
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) + labs(x = "Genre", y = "Sales", title = paste(publisher, " Sales By Genre")) + scale_fill_discrete(guide="none")
 }
 
 sales_by_genre_plot("Nintendo")
 sales_by_genre_plot("Electronic Arts")
-sales_by_genre_plot("Activision")
+sales_by_genre_plot("Activision Blizzard")
 sales_by_genre_plot("Ubisoft")
 sales_by_genre_plot("Sony")
+
+# Most popular genres
+ggplot(as.data.frame(sort(table(master$Genre)), decreasing = TRUE), aes(x = reorder(Var1, -Freq), y = Freq, fill = Var1)) +
+  geom_bar(stat = "identity") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(x = "Genre", y = "Games Published", title = "Most Popular Genres") +
+  scale_fill_discrete(guide="none")
+
+# Highest Selling Genres
+genres_by_sales <- master[, c(4,5,8)]  %>% drop_na() %>%
+  group_by(Genre) %>% summarize("Sum.Sales" = sum(Total.Sales)) %>% arrange(desc(Sum.Sales))
+
+ggplot(genres, aes(x = reorder(Genre, -Sum.Sales), y = Sum.Sales, fill = Genre)) +
+  geom_bar(stat = "identity") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(x = "Genre", y = "Sales", title = "Highest Selling Genres") +
+  scale_fill_discrete(guide="none")
+
+# Highest Selling Genre By Publisher
+genre_counter <- data.frame(Sales = integer(), Genre = character(), 
+                            stringsAsFactors = FALSE)
+publisher_size <- length(publishers_by_sales$Publisher.Simple)
+for(i in 1:publisher_size) {
+  genre_counter <- 
+    data.frame(lapply(genre_counter,as.character),stringsAsFactors = FALSE)
+  genre_counter <- 
+    rbind(genre_counter,c(publisher_by_genre(publishers_by_sales$Publisher.Simple[i])$Genre[1], publisher_by_genre(publishers_by_sales$Publisher.Simple[i])$Sum.Sales[1]))
+}
+
+colnames(genre_counter) <- c("Genre", "Sales")
+genre_counter %<>% drop_na()
+
+ggplot(genre_counter, aes(x = Genre, y = Sales, fill = Genre)) +
+  geom_bar(stat = "identity") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(x = "Genre", y = "Amount of Publishers", title = "Highest Selling Genres By Publisher") +
+  scale_fill_discrete(guide="none")
 ```
