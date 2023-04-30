@@ -79,7 +79,7 @@ ggplot(as.data.frame(sort(table(master$Genre)), decreasing = TRUE), aes(x = reor
   scale_fill_discrete(guide="none")
 
 # Highest Selling Genres
-genres_by_sales <- master[, c(4,5,8)]  %>% drop_na() %>%
+genres_by_sales <- master[, c(3,4,5,8)]  %>% drop_na() %>%
   group_by(Genre) %>% summarize("Sum.Sales" = sum(Total.Sales)) %>% arrange(desc(Sum.Sales))
 
 ggplot(genres_by_sales, aes(x = reorder(Genre, -Sum.Sales), y = Sum.Sales, fill = Genre)) +
@@ -107,10 +107,30 @@ ggplot(genre_counter, aes(x = Genre, y = Sales, fill = Genre)) +
   scale_fill_discrete(guide="none")
 ```
 
-Which consoles get the most support by genre?
+Which genre gets the most support on each console?
 
 ```{r}
+consoles_by_genres <- master %>%
+  group_by(Console, Genre) %>%
+  filter(Console %in% c("XB", "PS2", "DS", "3DS", "Wii", "NS", "PS3", "PS4", "X360", "XOne", "PSP", "WiiU", "And", "Mobile")) %>%
+  filter(Genre != "Misc") %>%
+  summarize(Genre.Amount = n()) %>%
+  arrange(desc(Genre.Amount)) %>%
+  ungroup() %>%
+  complete(Console, Genre, fill = list(Genre.Amount = 0)) %>% 
+  replace_na(list(Genre.Amount = 0))
 
+
+ggplot(consoles_by_genres, aes(x = Console, y = Genre, fill = Genre.Amount)) +
+  geom_tile() +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  scale_fill_gradient2(low = "white", mid = "green", high = "darkgreen", midpoint = 250) +
+  labs(x = "Consoles", 
+       y = "Genres", 
+       fill = "Genres", 
+       title = "Heatmap of Most Supported Genre on Each Console")
 ```
 
 On which consoles do publishers get the most sales?
