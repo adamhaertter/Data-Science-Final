@@ -142,6 +142,24 @@ ggplot(genre_counter, aes(x = reorder(Genre, -count), y = count, fill = Genre)) 
 Which genre gets the most support on each console?
 
 ```{r}
+console_colorscale <- c("PC" = "darkslategray",
+                    "XB" = "green",
+                    "X360" = "olivedrab2",
+                    "XOne" = "chartreuse3",
+                    "XS" = "darkgreen",
+                    "PS2" = "blue",
+                    "PS3" = "dodgerblue",
+                    "PS4" = "navy",
+                    "PS5" = "purple4",
+                    "PSP" = "purple", 
+                    "DS" = "black",
+                    "3DS" = "brown",
+                    "Wii" = "cyan",
+                    "WiiU" = "cyan3",
+                    "NS" = "red",
+                    "And" = "yellow",
+                    "Mobile" = "orange")
+
 consoles_by_genres <- master %>%
   group_by(Console, Genre) %>%
   filter(Console %in% c("XB", "PS2", "DS", "3DS", "Wii", "NS", "PS3", "PS4", "X360", "XOne", "PSP", "WiiU", "And", "Mobile")) %>%
@@ -183,11 +201,41 @@ ggplot(console_by_publisher_sales, aes(x = Console, y = Publisher.Simple, fill =
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  scale_fill_gradient2(low = "white", mid = "magenta", high = "purple", midpoint = 225, na.value = "white") + 
+  scale_fill_gradient2(low = "white", mid = "magenta", high = "purple", midpoint = 225, na.value = "white") +
   labs(x = "Console", 
        y = "Publisher", 
        fill = "Total Sales", 
        title = "Heatmap of Best-Performing Console Releases by Publisher")
+
+# Best PerformingConsole Releases By Publisher Bar Graphs
+console_performances_by_publisher <- function(publisher) {
+  master[, c(3,4,5,8)] %>%
+  filter(Console %in% c("PC", "XB", "PS2", "DS", "3DS", "Wii", "NS", "PS3", "PS4", "PS5", "X360", "XOne", "XS", "PSP", "WiiU", "And", "Mobile") & Publisher.Simple == publisher) %>%
+  drop_na() %>%
+  group_by(Console) %>%
+    summarize(Console.Sales = sum(Total.Sales))
+}
+
+pub_performances_consoles_plot <- function(publisher) {
+  ggplot(console_performances_by_publisher(publisher), aes(x = reorder(Console, -Console.Sales), y = Console.Sales, fill = Console)) + geom_bar(stat = "identity", position = position_dodge()) + theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) + labs(x = "Console", y = "Sales", title = paste(publisher, " Sales By Console")) + scale_fill_discrete(guide="none") + scale_fill_manual(values = console_colorscale, guide = "none")
+}
+
+pub_performances_consoles_plot("Nintendo")
+pub_performances_consoles_plot("Electronic Arts")
+pub_performances_consoles_plot("Activision Blizzard")
+pub_performances_consoles_plot("Sony")
+pub_performances_consoles_plot("Ubisoft")
+pub_performances_consoles_plot("Bandai Namco")
+pub_performances_consoles_plot("THQ")
+pub_performances_consoles_plot("Sega")
+pub_performances_consoles_plot("Square Enix")
+pub_performances_consoles_plot("Konami")
+pub_performances_consoles_plot("Microsoft")
+pub_performances_consoles_plot("Capcom")
+pub_performances_consoles_plot("Rockstar Games")
+pub_performances_consoles_plot("Warner Bros")
+pub_performances_consoles_plot("2K Games")
 ```
 
 On which consoles do publishers produce the most games?
@@ -209,9 +257,39 @@ ggplot(consoles_by_publisher, aes(x = Console, y = Publisher.Simple, fill = Rele
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  scale_fill_gradient2(low = "white", mid = "orange", high = "red", midpoint = 250) +
+  scale_fill_gradient2(low = "white", mid = "orange", high = "red", midpoint = 250) + 
   labs(x = "Consoles", 
        y = "Publishers", 
        fill = "Game Releases", 
        title = "Heatmap of Most Supported Consoles by Each Publisher")
+
+# Console Releases By Publisher Bar Graphs
+console_releases_by_publisher <- function(publisher) {
+  master[, c(3,4,5,8)] %>%
+  filter(Console %in% c("PC", "XB", "PS2", "DS", "3DS", "Wii", "NS", "PS3", "PS4", "PS5", "X360", "XOne", "XS", "PSP", "WiiU", "And", "Mobile") & Publisher.Simple == publisher) %>%
+  drop_na() %>%
+  group_by(Console) %>%
+    summarize(Releases = n())
+}
+
+pub_supported_consoles_plot <- function(publisher) {
+  ggplot(console_releases_by_publisher(publisher), aes(x = reorder(Console, -Releases), y = Releases, fill = Console)) + geom_bar(stat = "identity", position = position_dodge()) + theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) + labs(x = "Console", y = "Releases", title = paste(publisher, " Releases By Console")) + scale_fill_discrete(guide="none") + scale_fill_manual(values = console_colorscale, guide = "none")
+}
+
+pub_supported_consoles_plot("Nintendo")
+pub_supported_consoles_plot("Electronic Arts")
+pub_supported_consoles_plot("Activision Blizzard")
+pub_supported_consoles_plot("Sony")
+pub_supported_consoles_plot("Ubisoft")
+pub_supported_consoles_plot("Bandai Namco")
+pub_supported_consoles_plot("THQ")
+pub_supported_consoles_plot("Sega")
+pub_supported_consoles_plot("Square Enix")
+pub_supported_consoles_plot("Konami")
+pub_supported_consoles_plot("Microsoft")
+pub_supported_consoles_plot("Capcom")
+pub_supported_consoles_plot("Rockstar Games")
+pub_supported_consoles_plot("Warner Bros")
+pub_supported_consoles_plot("2K Games")
 ```
