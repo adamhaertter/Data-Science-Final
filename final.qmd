@@ -82,7 +82,7 @@ ggplot(as.data.frame(sort(table(master$Genre)), decreasing = TRUE), aes(x = reor
 genres_by_sales <- master[, c(4,5,8)]  %>% drop_na() %>%
   group_by(Genre) %>% summarize("Sum.Sales" = sum(Total.Sales)) %>% arrange(desc(Sum.Sales))
 
-ggplot(genres, aes(x = reorder(Genre, -Sum.Sales), y = Sum.Sales, fill = Genre)) +
+ggplot(genres_by_sales, aes(x = reorder(Genre, -Sum.Sales), y = Sum.Sales, fill = Genre)) +
   geom_bar(stat = "identity") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
   labs(x = "Genre", y = "Sales", title = "Highest Selling Genres") +
   scale_fill_discrete(guide="none")
@@ -105,4 +105,22 @@ ggplot(genre_counter, aes(x = Genre, y = Sales, fill = Genre)) +
   geom_bar(stat = "identity") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
   labs(x = "Genre", y = "Amount of Publishers", title = "Highest Selling Genres By Publisher") +
   scale_fill_discrete(guide="none")
+```
+
+Which consoles get the most support by genre?
+
+```{r}
+
+```
+
+On which consoles do publishers get the most sales?
+
+```{r}
+
+```
+
+On which consoles do publishers produce the most games?
+
+```{r}
+
 ```
