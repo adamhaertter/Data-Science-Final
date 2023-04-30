@@ -87,29 +87,44 @@ sales_by_genre_plot <- function(publisher) {
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) + labs(x = "Genre", y = "Sales", title = paste(publisher, "Sales By Genre")) + scale_fill_manual(values = colorscale, guide = "none")
 }
 
-sales_by_genre_plot("Nintendo")
-sales_by_genre_plot("Electronic Arts")
-sales_by_genre_plot("Activision Blizzard")
-sales_by_genre_plot("Ubisoft")
-sales_by_genre_plot("Sony")
+save_genre_plot <- function(publisher) {
+  savable <- sales_by_genre_plot(publisher)
+  publisher %<>% tolower() %>% str_replace_all(" ", "_")
+  save(savable, file = here("plots", "genre_v_publisher", paste(publisher, "_sales_by_genre.rda", sep = "")))
+  ggsave(here("plots", "genre_v_publisher", paste(publisher, "_sales_by_genre.png", sep = "")))
+  savable
+}
+
+save_genre_plot("Nintendo")
+save_genre_plot("Electronic Arts")
+save_genre_plot("Activision Blizzard")
+save_genre_plot("Ubisoft")
+save_genre_plot("Sony")
+
 
 # Most popular genres
 master_without_misc <- master %>% filter(Genre != "Misc")
 popular_genres_data <- as.data.frame(sort(table(master_without_misc$Genre)), decreasing = TRUE)
 
-ggplot(popular_genres_data, aes(x = reorder(Var1, -Freq), y = Freq, fill = Var1)) +
+savable <- ggplot(popular_genres_data, aes(x = reorder(Var1, -Freq), y = Freq, fill = Var1)) +
   geom_bar(stat = "identity") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
   labs(x = "Genre", y = "Games Published", title = "Most Popular Genres") + 
   scale_fill_manual(values = colorscale, guide = "none")
+save(savable, file = here("plots", "genre_v_publisher", "most_popular_genre.rda"))
+ggsave(here("plots", "genre_v_publisher", "most_popular_genre.png"))
+savable
 
 # Highest Selling Genres
 genres_by_sales <- master_without_misc[, c(3,4,5,8)]  %>% drop_na() %>%
   group_by(Genre) %>% summarize("Sum.Sales" = sum(Total.Sales)) %>% arrange(desc(Sum.Sales))
 
-ggplot(genres_by_sales, aes(x = reorder(Genre, -Sum.Sales), y = Sum.Sales, fill = Genre)) +
+savable <- ggplot(genres_by_sales, aes(x = reorder(Genre, -Sum.Sales), y = Sum.Sales, fill = Genre)) +
   geom_bar(stat = "identity") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
   labs(x = "Genre", y = "Sales", title = "Highest Selling Genres") +
   scale_fill_manual(values = colorscale, guide = "none")
+save(savable, file = here("plots", "genre_v_publisher", "highest_selling_genre.rda"))
+ggsave(here("plots", "genre_v_publisher", "highest_selling_genre.png"))
+savable
 
 # Highest Selling Genre By Publisher
 genre_counter <- data.frame(Sales = integer(), Genre = character(), 
@@ -130,7 +145,7 @@ genre_counter %<>% drop_na() %>%
   mutate("count" = n()) %>%
   .[, c(1,3)] %>% unique()
 
-ggplot(genre_counter, aes(x = reorder(Genre, -count), y = count, fill = Genre)) +
+savable <- ggplot(genre_counter, aes(x = reorder(Genre, -count), y = count, fill = Genre)) +
   geom_bar(stat = "identity") + 
   geom_text(aes(label = count), stat = "identity", vjust = -.5, color = "black") +
   scale_y_continuous(limits = c(0, 150)) +
@@ -140,6 +155,9 @@ ggplot(genre_counter, aes(x = reorder(Genre, -count), y = count, fill = Genre)) 
        y = "Number of Publishers", 
        title = "Publishers' Most-Produced Genres") +
   scale_fill_manual(values = colorscale, guide = "none")
+save(savable, file = here("plots", "genre_v_publisher", "number_one_genre.rda"))
+ggsave(here("plots", "genre_v_publisher", "number_one_genre.png"))
+savable
 ```
 
 Which genre gets the most support on each console?
@@ -174,7 +192,7 @@ consoles_by_genres <- master %>%
   replace_na(list(Genre.Amount = 0))
 
 
-ggplot(consoles_by_genres, aes(x = Console, y = Genre, fill = Genre.Amount)) +
+savable <- ggplot(consoles_by_genres, aes(x = Console, y = Genre, fill = Genre.Amount)) +
   geom_tile() +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
@@ -184,6 +202,10 @@ ggplot(consoles_by_genres, aes(x = Console, y = Genre, fill = Genre.Amount)) +
        y = "Genres", 
        fill = "Genres", 
        title = "Heatmap of Most Supported Genre on Each Console")
+
+save(savable, file = here("plots", "genre_v_release", "genre_release_heatmap.rda"))
+ggsave(here("plots", "genre_v_release", "genre_release_heatmap.png"))
+savable
 ```
 
 On which consoles do publishers get the most sales?
@@ -199,7 +221,7 @@ console_by_publisher_sales <- master %>%
   summarize("Sum.Sales" = sum(Total.Sales), .groups = "drop") %>% ungroup() %>% complete(Console, Publisher.Simple, fill = list(Sum.Sales = 0)) %>% 
   replace_na(list(Sum.Sales = 0)) 
 
-ggplot(console_by_publisher_sales, aes(x = Console, y = Publisher.Simple, fill = Sum.Sales)) +
+savable <- ggplot(console_by_publisher_sales, aes(x = Console, y = Publisher.Simple, fill = Sum.Sales)) +
   geom_tile() +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
@@ -209,6 +231,10 @@ ggplot(console_by_publisher_sales, aes(x = Console, y = Publisher.Simple, fill =
        y = "Publisher", 
        fill = "Total Sales", 
        title = "Heatmap of Best-Performing Console Releases by Publisher")
+
+save(savable, file = here("plots", "console_v_sales", "console_sales_heatmap.rda"))
+ggsave(here("plots", "console_v_sales", "console_sales_heatmap.png"))
+savable
 
 # Best Performing Console Releases By Publisher Bar Graphs
 console_performances_by_publisher <- function(publisher) {
@@ -224,21 +250,29 @@ pub_performances_consoles_plot <- function(publisher) {
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) + labs(x = "Console", y = "Sales", title = paste(publisher, " Sales By Console")) + scale_fill_discrete(guide="none") + scale_fill_manual(values = console_colorscale, guide = "none")
 }
 
-pub_performances_consoles_plot("Nintendo")
-pub_performances_consoles_plot("Electronic Arts")
-pub_performances_consoles_plot("Activision Blizzard")
-pub_performances_consoles_plot("Sony")
-pub_performances_consoles_plot("Ubisoft")
-pub_performances_consoles_plot("Bandai Namco")
-pub_performances_consoles_plot("THQ")
-pub_performances_consoles_plot("Sega")
-pub_performances_consoles_plot("Square Enix")
-pub_performances_consoles_plot("Konami")
-pub_performances_consoles_plot("Microsoft")
-pub_performances_consoles_plot("Capcom")
-pub_performances_consoles_plot("Rockstar Games")
-pub_performances_consoles_plot("Warner Bros")
-pub_performances_consoles_plot("2K Games")
+save_pub_performance <- function(publisher) {
+  pub_performances_consoles_plot(publisher)
+  publisher %<>% tolower() %>% str_replace_all(" ", "_")
+  save(savable, file = here("plots", "console_v_sales", paste(publisher, "_sales_by_console.rda", sep = "")))
+  ggsave(here("plots", "console_v_sales", paste(publisher, "_sales_by_console.png", sep = "")))
+  savable
+}
+
+save_pub_performance("Nintendo")
+save_pub_performance("Electronic Arts")
+save_pub_performance("Activision Blizzard")
+save_pub_performance("Sony")
+save_pub_performance("Ubisoft")
+save_pub_performance("Bandai Namco")
+save_pub_performance("THQ")
+save_pub_performance("Sega")
+save_pub_performance("Square Enix")
+save_pub_performance("Konami")
+save_pub_performance("Microsoft")
+save_pub_performance("Capcom")
+save_pub_performance("Rockstar Games")
+save_pub_performance("Warner Bros")
+save_pub_performance("2K Games")
 ```
 
 On which consoles do publishers produce the most games?
@@ -255,7 +289,7 @@ consoles_by_publisher <- master %>%
   replace_na(list(Releases = 0))
 
 
-ggplot(consoles_by_publisher, aes(x = Console, y = Publisher.Simple, fill = Releases)) +
+savable <- ggplot(consoles_by_publisher, aes(x = Console, y = Publisher.Simple, fill = Releases)) +
   geom_tile() +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
@@ -265,6 +299,10 @@ ggplot(consoles_by_publisher, aes(x = Console, y = Publisher.Simple, fill = Rele
        y = "Publishers", 
        fill = "Game Releases", 
        title = "Heatmap of Most Supported Consoles by Each Publisher")
+
+save(savable, file = here("plots", "console_v_release", "console_release_heatmap.rda"))
+ggsave(here("plots", "console_v_release", "console_release_heatmap.png"))
+savable
 
 # Console Releases By Publisher Bar Graphs
 console_releases_by_publisher <- function(publisher) {
@@ -280,19 +318,27 @@ pub_supported_consoles_plot <- function(publisher) {
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) + labs(x = "Console", y = "Releases", title = paste(publisher, " Releases By Console")) + scale_fill_discrete(guide="none") + scale_fill_manual(values = console_colorscale, guide = "none")
 }
 
-pub_supported_consoles_plot("Nintendo")
-pub_supported_consoles_plot("Electronic Arts")
-pub_supported_consoles_plot("Activision Blizzard")
-pub_supported_consoles_plot("Sony")
-pub_supported_consoles_plot("Ubisoft")
-pub_supported_consoles_plot("Bandai Namco")
-pub_supported_consoles_plot("THQ")
-pub_supported_consoles_plot("Sega")
-pub_supported_consoles_plot("Square Enix")
-pub_supported_consoles_plot("Konami")
-pub_supported_consoles_plot("Microsoft")
-pub_supported_consoles_plot("Capcom")
-pub_supported_consoles_plot("Rockstar Games")
-pub_supported_consoles_plot("Warner Bros")
-pub_supported_consoles_plot("2K Games")
+save_pub_supported <- function(publisher){
+  pub_supported_consoles_plot(publisher)
+  publisher %<>% tolower() %>% str_replace_all(" ", "_")
+  save(savable, file = here("plots", "console_v_release", paste(publisher, "_releases_by_console.rda", sep = "")))
+  ggsave(here("plots", "console_v_release", paste(publisher, "_releases_by_console.png", sep = "")))
+  savable
+}
+
+save_pub_supported("Nintendo")
+save_pub_supported("Electronic Arts")
+save_pub_supported("Activision Blizzard")
+save_pub_supported("Sony")
+save_pub_supported("Ubisoft")
+save_pub_supported("Bandai Namco")
+save_pub_supported("THQ")
+save_pub_supported("Sega")
+save_pub_supported("Square Enix")
+save_pub_supported("Konami")
+save_pub_supported("Microsoft")
+save_pub_supported("Capcom")
+save_pub_supported("Rockstar Games")
+save_pub_supported("Warner Bros")
+save_pub_supported("2K Games")
 ```
