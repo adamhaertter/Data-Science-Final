@@ -244,10 +244,15 @@ source("scripts/wrangle_data.R")
 See [wrangle_data.R](scripts/wrangle_data.R).
 
 # Defining Functions
+We realized that the "most popular" developed genre was Miscellaneous according to VGChartz. This does not give us a good indication of what is actually most popular because that's not a genuine Genre. We decided to filter out any times that Misc was used in our calculations whenever we were presenting mainly about genre. We would keep Misc later once we were only looking into sales.
+```{r}
+master_without_misc <- master %>% filter(Genre != "Misc")
+```
+
 Our Publisher By Genre Function allowed us to gather the sales of each genre developed by a single publisher. We would plot this information to see what genres were the highest selling for a certain publisher.
 ```{r}
 publisher_by_genre <- function(publisher) {
-  master[, c(3,4,5,8)] %>%
+  master_without_misc[, c(3,4,5,8)] %>%
   filter(Console != "Series" & Console != "All" & Publisher.Simple == publisher & Genre != "Misc") %>%
   drop_na() %>%
   group_by(Genre) %>% summarize("Sum.Sales" = sum(Total.Sales)) %>% arrange(desc(Sum.Sales))
@@ -334,7 +339,34 @@ save_pub_supported <- function(publisher){
 ```
 
 # Analysis
+Most of our plots were made through the function calls above, but some of them did not need functions as they were based on the overall industry and not just publisher names.
 
+For example, we used this plot to visualize the most popular genres based on how many games were developed for each. This will be important in comparing to other data to see if publishers are developing the genres making the most money.
+```{r}
+popular_genres_data <- as.data.frame(sort(table(master_without_misc$Genre)), decreasing = TRUE)
+
+savable <- ggplot(popular_genres_data, aes(x = reorder(Var1, -Freq), y = Freq, fill = Var1)) +
+  geom_bar(stat = "identity") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(x = "Genre", y = "Games Published", title = "Most Popular Genres") + 
+  scale_fill_manual(values = colorscale, guide = "none")
+save(savable, file = here("plots", "genre_v_publisher", "most_popular_genre.rda"))
+
+# Saving the plot after creating it
+ggsave(here("plots", "genre_v_publisher", "most_popular_genre.png"))
+```
+
+With Genres By Sales, we calculated what was the best selling genre. This allows the audience to see what genres are making the most money and comparing it to other graphs to see if if publishers should steer towards what is making more profit.
+```{r}
+genres_by_sales <- master_without_misc[, c(3,4,5,8)]  %>% drop_na() %>%
+  group_by(Genre) %>% summarize("Sum.Sales" = sum(Total.Sales)) %>% arrange(desc(Sum.Sales))
+
+savable <- ggplot(genres_by_sales, aes(x = reorder(Genre, -Sum.Sales), y = Sum.Sales, fill = Genre)) +
+  geom_bar(stat = "identity") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(x = "Genre", y = "Sales", title = "Highest Selling Genres") +
+  scale_fill_manual(values = colorscale, guide = "none")
+save(savable, file = here("plots", "genre_v_publisher", "highest_selling_genre.rda"))
+ggsave(here("plots", "genre_v_publisher", "highest_selling_genre.png"))
+```
 ## Findings
 
 ## Limitations
