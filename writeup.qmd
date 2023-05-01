@@ -12,15 +12,77 @@ format: pdf
 
 # Load Packages
 
-# Obtaining Our Data
+# Our Data
 
 ## Origin of Data
+
+Our data comes from VGChartz.com, which is a large database of video game data. 
+At the time of data collection, their database contained 62,710 different entries of publicly-available data for different video game releases. 
+Something that is important to note is that VGChartz stores data for games split up by consoles, but included in this data is overall data for individual game series and multi-platform releases. 
+For example, the website has a separate section for Pokemon as a series and each individual game in the series. 
+Therefore, in the interest of not duplicating data and honestly representing all sales data, we often drop the `Series` and `All` data to provide a better representation of our data.
+
+## Obtaining the Data
+
+In order to obtain data from VGChartz, we opted to query the webapge at https://www.vgchartz.com/games/games.php.
+The table on this page dynamically renders using JavaScript to display the queried information. 
+We opted for this approach over using their API keys because of the simplicity of getting all the relevant data at once rather than making multiple API calls.
+
+To do this, we had to create a Python scraper because the table's data wasn't part of the native HTML.
+Therefore, we couldn't use R to scrape the data easily like we had learned in class.
+Our Python scraper uses selenium, BeautifulSoup, and ChromeDriver, and needs all of those installed in order to work locally.
+Below is an excerpt from our Python scraper, which defines the full url query we used to get all information and the genres we add to it to get full coverage.
+
+```{Python}
+url1 = "https://www.vgchartz.com/games/games.php?name=&keyword=&console=&region=All&developer=&publisher=&goty_year=&genre="
+url2 = "&boxart=Both&banner=Both&ownership=Both&showmultiplat=No&results=10000&order=Sales&showtotalsales=1&showpublisher=1&showvgchartzscore=0&showvgchartzscore=1&shownasales=1&showdeveloper=1&showcriticscore=1&showpalsales=1&showreleasedate=1&showuserscore=1&showjapansales=1&showlastupdate=1&showothersales=1&showshipped=1"
+
+genres = ["Action", "Action-Adventure", "Adventure", "Board Game", "Education", 
+          "Fighting", "Misc", "MMO", "Music", "Party", "Platform", "Puzzle", 
+          "Racing", "Role-Playing", "Sandbox", "Shooter", "Simulation", "Sports", 
+          "Strategy", "Visual Novel"]
+```
+
+Through a loop, we scrape table queries for each of the supported genres listed on VGChartz.
+Then, each gets saved to its own .csv file.
+We iterate for each genre because this is the only relevant column that VGChartz stores but doesn't render to the main table we use.
+As a result, saving each genre to its own .csv allows us to keep this information and apply it later.
+
+```{Python}
+for genre in genres:
+    # Removed some code here, see source file
+  
+    table_html = table_element.get_attribute('outerHTML')
+    soup = BeautifulSoup(table_html, 'html.parser')
+    rows = soup.find_all('tr')
+
+    print("Building data array from page...")
+
+    data = []
+    for i, row in enumerate(rows):
+        if(i < 3):
+            cols = row.find_all('th')
+        else:
+            cols = row.find_all('td')
+        row_data = []
+        for col in cols:
+            if col.find('img') is not None:
+                row_data.append(col.find('img').get('alt'))
+            else:
+                row_data.append(col.text.strip())
+        if(i == 2):            
+            row_data.insert(1, "Box Art")
+            print(row_data)
+        data.append(row_data)
+        
+    # Then, write to csv
+```
+
+## Tidying the Data
 
 ## Loading the Data
 
 # Defining Functions
-
-# Tidying the Data
 
 # Analysis
 
