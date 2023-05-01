@@ -5,11 +5,11 @@ format: pdf
 ---
 
 # Introduction
-
+Our topic was A Statistical Analysis on How Genre/Platform Affects the Video Game Market. We looked into a list from VGChartz.com of every video game released and how the genre and platform affects the amount of sales. Certain developers perform differently with the various genres and platforms. These results will allow people to see what genres appear to be successful in the industry as a whole or depending on the publisher/platform that is supported.
 ## Topic Introduction
-
+Video games, like other media such as shows, movies, and books, have a variety of genres. These genres are partially related to their stories, but have more to do with the way that the game is played. Certain genres may perform better or less than others because of the audience's interest in them. Also, video games release on certain platforms or consoles. These systems may be owned by only a portion of the audience. Having a game on a higher amount of platforms may increase sales numbers, but also increase the time and effort needed to be able to port the game to them. Publishers must find their balance to see what platform they wish to release their games on. Some publishers also have creaed a platform for games to be played on so it is reasonable that they will release games exclusively on that platform so to increase the demand for that console.
 ## Relevance / Importance
-
+Publishers may be influenced by this information to decide on what genres to develop games in to increase their profits. Specific publishers that we cover may also find it interesting to see if the genre they make the most games for is also the one that makes the most money by game/franchise. This would reveal flaws in the genres or platforms they are currently developing for and how they may be missing out on improved sales.
 # Load Packages
 
 # Obtaining Our Data
