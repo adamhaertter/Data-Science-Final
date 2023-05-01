@@ -18,6 +18,21 @@ Publishers may be influenced by this information to decide on what genres to dev
 
 # Load Packages
 
+The packages we use in this project are kept to a minimum. 
+Because we are obtaining our data on our own, we don't need to install or load it thorugh an R package at all.
+
+* tidyverse is used to bring in a lot of different packages that we use for our data, most specifically dplyr, readr, and ggplot, all of which are used heavily here.
+* magrittr is specifically defined because of our use of the double pipe operator `%<>%`. Bugs arose attempting to use this without specifically librarying magrittr, which is why it is separately defined from tidyverse.
+* here is used for file and directory control. This is especially important when we are saving plots to files as well as saving and loading data files.
+
+```{r lib}
+#| message: false
+
+library("tidyverse")
+library("magrittr")
+library("here")
+```
+
 # Our Data
 
 ## Origin of Data
