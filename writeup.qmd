@@ -1,0 +1,33 @@
+---
+title: "Data Science 1: Final Writeup"
+author: "Adam Haertter & Brennan Mulligan"
+format: pdf
+---
+
+# Introduction
+
+## Topic Introduction
+
+## Relevance / Importance
+
+# Load Packages
+
+# Obtaining Our Data
+
+## Origin of Data
+
+## Loading the Data
+
+# Defining Functions
+
+# Tidying the Data
+
+# Analysis
+
+## Findings
+
+## Limitations
+
+## Conclusions
+
+## Future Work
