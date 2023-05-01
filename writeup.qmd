@@ -5,11 +5,17 @@ format: pdf
 ---
 
 # Introduction
+
 Our topic was A Statistical Analysis on How Genre/Platform Affects the Video Game Market. We looked into a list from VGChartz.com of every video game released and how the genre and platform affects the amount of sales. Certain developers perform differently with the various genres and platforms. These results will allow people to see what genres appear to be successful in the industry as a whole or depending on the publisher/platform that is supported.
+
 ## Topic Introduction
-Video games, like other media such as shows, movies, and books, have a variety of genres. These genres are partially related to their stories, but have more to do with the way that the game is played. Certain genres may perform better or less than others because of the audience's interest in them. Also, video games release on certain platforms or consoles. These systems may be owned by only a portion of the audience. Having a game on a higher amount of platforms may increase sales numbers, but also increase the time and effort needed to be able to port the game to them. Publishers must find their balance to see what platform they wish to release their games on. Some publishers also have creaed a platform for games to be played on so it is reasonable that they will release games exclusively on that platform so to increase the demand for that console.
+
+Video games, like other media such as shows, movies, and books, have a variety of genres. These genres are partially related to their stories, but have more to do with the way that the game is played. Certain genres may perform better or less than others because of the audience's interest in them. Also, video games release on certain platforms or consoles. These systems may be owned by only a portion of the audience. Having a game on a higher amount of platforms may increase sales numbers, but also increase the time and effort needed to be able to port the game to them. Publishers must find their balance to see what platform they wish to release their games on. Some publishers also have created a platform for games to be played on so it is reasonable that they will release games exclusively on that platform so to increase the demand for that console.
+
 ## Relevance / Importance
+
 Publishers may be influenced by this information to decide on what genres to develop games in to increase their profits. Specific publishers that we cover may also find it interesting to see if the genre they make the most games for is also the one that makes the most money by game/franchise. This would reveal flaws in the genres or platforms they are currently developing for and how they may be missing out on improved sales.
+
 # Load Packages
 
 # Our Data
@@ -80,7 +86,147 @@ for genre in genres:
 
 ## Tidying the Data
 
+To clean the data, the first thing we wanted to do was combine all of our .csv files for each genre into one master sheet that we could use for everything.
+This would ultimately replicate the massive database of information that was VGChartz.
+Each genre .csv would be loaded from its directory and have its filename be appended as a separate column representing the genre.
+Because we saved each individual genre to its own file, this was very simple.
+
+```{r}
+load_add_genre <- function(genre) {
+  path <- paste("data/raw/", genre %>% str_replace_all(" ", "_"), ".csv", sep = "")
+  readfile <- read.csv(path, skip = 2) %>%
+    mutate("Genre" = genre) %>%
+    subset(select = -`Box.Art`)
+  readfile
+}
+```
+
+We also removed the column for the Box Art, which was included as part of the original VGChartz rendered table. 
+Because we ran our scraper in headless mode, we didn't save any images or urls to our .csv files, so this column is useless to us now. 
+Lastly, we ran through each of our genres and appended the entire contents of that .csv to the master sheet.
+
+```{r}
+master <- tibble()
+for(genre in genres) {
+  raw_list <- genre %>% load_add_genre()
+  master %<>% bind_rows(raw_list)
+}
+```
+
+On VGChartz, some games had full reviews linked in the output of the table we scraped.
+If that was the case, the words "Read the review" where attached on a newline under the game name.
+Since we just want the game name, we removed that text wherever it appeared.
+We also replaced the site's string "N/A" with actual `NA` values in R.
+All numbers in our data were in millions, which was represented with an 'm' after the number. We stripped these out and converted all appropriate columns to numeric values.
+
+```{r}
+# Remove "Read the review" from Title
+master$Game %<>% str_replace_all("    Read the review", "")
+# Replace "N/A" with actual NA val
+master[2:17] %<>% mutate_all(~na_if(., "N/A"))
+# Strip m from counts, convert to ints, put factor in title
+master[9:14] %<>% mutate_all(~str_replace_all(., "m", "") %>% as.numeric())
+```
+
+VGChartz also included separate data called Total.Shipped and Total.Sales.
+* Total.Sales are the actual reported numbers of copies sold for each game.
+* Total.Shipped are how many copies of the game were shipped to retailers.
+
+Companies may report either, both, or neither, but after some testing, we found both columns to be mutally exclusive. That is to say, if there was a value for Total.Sales, there was never a corresponding value for Total.Shipped. Because they were mutally exclusive and represent very similar metrics, we combined them into a single column.
+```{r}
+# Combine Total.Sales and Total.Shipped into one column - mutually exclusive
+master$Total.Units <- ifelse(!is.na(master$Total.Shipped) & !is.na(master$Total.Sales), 
+                             NA, 
+                             ifelse(!is.na(master$Total.Shipped), 
+                                    master$Total.Shipped, 
+                                    master$Total.Sales))
+# Rename Total.Units (combined) to Total.Sales for consistency
+colnames(master)[colnames(master)=="Total.Units"] <- "Total.Sales"
+```
+
+The last part of our data cleanup came from looking at the Publisher names, which was a big area we wanted to focus on.
+Initially, we had well over a thousand publishers (~1200), but some were represented in multiple ways. 
+Companies could be represented by multiple names, including some abbreviations or even misspellings.
+Because we wanted to use Publisher data as one of our core facets, we compiled a list of all unique publisher names in our dataset and looked through to see which needed combined.
+
+```{r}
+publishers_by_sales <- master[, c(3,6,8)]  %>% drop_na() %>%
+  group_by(Publisher) %>% 
+  summarize("Sum.Sales" = sum(Total.Sales)) %>% 
+  arrange(desc(Sum.Sales))
+
+publishers_by_sales
+```
+
+This required some time for outside research, as we also wanted to include companies that had merged into one publishing entity or those companies which have acquired all assets of another company.
+One example here in the preview is "Electronic Arts" with 1758.69 cumulative sales and "EA Sports" with 1039.99 cumulative sales. These are the same company, so we knew we had to combine them.
+In the interest of keeping the original data available, we made a new column called Publisher.Simple to store this new data.
+
+```{r}
+# Make a column for common publisher names
+master$Publisher.Simple <- master$Publisher %>% clean_names()
+```
+
+The function `clean_names()` is exceptionally long, as it reduces the size of Publisher names by nearly 200 titles.
+Simply, the function repeatedly calls `str_replace_all()` to modify the duplicate companies as they appear in the data. 
+Some cleanup is also done to ensure these replace calls do not affect each other.
+Below is an excerpt from the function, but representing the entire function in this write-up would be taking up unnecessary space.
+If you are interested in seeing the full function, be sure to see [parse_vgcharts.R](scripts/parse_vgchartz.R).
+
+```{r}
+clean_names <- function(names) {
+  names %>% str_replace_all("1C Company", "1C Maddox Games") %>%
+    # 2K Games subsidiaries
+    str_replace_all("2K Play", "2K Games") %>%
+    str_replace_all("2K Sports", "2K Games") %>%
+    str_replace_all("989 Sports", "989 Studios") %>%
+    # Bandai Namco merger
+    str_replace_all("Bandai Namco Entertainment", "Bandai Namco") %>%
+    str_replace_all("Bandai Namco Games", "Bandai Namco") %>%
+    str_replace_all("Bandai Visual", "Bandai Namco") %>%
+    str_replace_all("Namco Bandai Games", "Bandai Namco") %>%
+    str_replace_all("Namco Bandai", "Bandai Namco") %>%
+    str_replace_all("Namco Networks America Inc.", "Bandai Namco") %>%
+    str_replace_all("Namco", "Bandai Namco") %>%
+    str_replace_all("Bandai", "Bandai Namco") %>%
+    str_replace_all("Bandai Bandai Namco", "Bandai Namco") %>% # Cleanup
+    str_replace_all("Bandai Namco Namco", "Bandai Namco") %>%
+    str_replace_all("Bandai Namco Bandai Namco", "Bandai Namco") %>%
+    # More solos
+    str_replace_all("CD Projekt Red Studio", "CD Projekt Red") %>%
+    str_replace_all("Capcom Entertainment", "Capcom") %>%
+    str_replace_all("Coffee Stain Publishing", "Coffee Stain Studios") %>%
+    str_replace_all("D3Publisher", "D3 Publisher") #%>% 
+    # Many more companies...   
+}
+```
+
+Finally, the last modification to our dataset is to rearrange the column names in a logical order.
+The master sheet is then saved back to a .csv file and .rda file so we can reload it at any time.
+```{r}
+# Reorder columns logically
+master <-master[, c("Pos", "Game", "Console", "Genre", "Publisher.Simple", "Publisher", "Developer", "Total.Sales", "NA.Sales", "PAL.Sales", "Japan.Sales", "Other.Sales", "Release.Year", "Release.Month", "Release.Day", "VGChartz.Score", "Critic.Score", "User.Score", "Updated.Year", "Updated.Month", "Updated.Day")] 
+
+write.csv(master, file = "data/wrangled/vgchartz_full.csv")
+save(master, file = here("data", "wrangled", "wrangled_data.rda"))
+```
+
 ## Loading the Data
+
+To reload the data into the dataset, this call serves to replace the master dataframe back into the environment.
+
+```{r}
+load(file = here("data", "wrangled", "wrangled_data.rda"))
+```
+
+Additionally, most of our data wrangling has been abstracted into their own scripts, so running this call reruns them if master ever needs modified for everyone.
+This retraces most of the steps shown above in this section of the writeup.
+
+```{r}
+source("scripts/wrangle_data.R")
+```
+
+See [wrangle_data.R](scripts/wrangle_data.R).
 
 # Defining Functions
 
