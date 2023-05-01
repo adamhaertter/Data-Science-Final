@@ -54,7 +54,9 @@ Therefore, we couldn't use R to scrape the data easily like we had learned in cl
 Our Python scraper uses selenium, BeautifulSoup, and ChromeDriver, and needs all of those installed in order to work locally.
 Below is an excerpt from our Python scraper, which defines the full url query we used to get all information and the genres we add to it to get full coverage.
 
-```{Python}
+```{python, eval = FALSE}
+#| eval: FALSE
+#| output: FALSE
 url1 = "https://www.vgchartz.com/games/games.php?name=&keyword=&console=&region=All&developer=&publisher=&goty_year=&genre="
 url2 = "&boxart=Both&banner=Both&ownership=Both&showmultiplat=No&results=10000&order=Sales&showtotalsales=1&showpublisher=1&showvgchartzscore=0&showvgchartzscore=1&shownasales=1&showdeveloper=1&showcriticscore=1&showpalsales=1&showreleasedate=1&showuserscore=1&showjapansales=1&showlastupdate=1&showothersales=1&showshipped=1"
 
@@ -64,12 +66,15 @@ genres = ["Action", "Action-Adventure", "Adventure", "Board Game", "Education",
           "Strategy", "Visual Novel"]
 ```
 
-Through a loop, we scrape table queries for each of the supported genres listed on VGChartz.
-Then, each gets saved to its own .csv file.
-We iterate for each genre because this is the only relevant column that VGChartz stores but doesn't render to the main table we use.
-As a result, saving each genre to its own .csv allows us to keep this information and apply it later.
+Through a loop, we scrape table queries for each of the supported genres
+listed on VGChartz. Then, each gets saved to its own .csv file. We iterate for
+each genre because this is the only relevant column that VGChartz stores but
+doesn't render to the main table we use. As a result, saving each genre to its
+own .csv allows us to keep this information and apply it later.
 
-```{Python}
+```{python, eval = FALSE}
+#| eval: FALSE
+#| output: FALSE
 for genre in genres:
     # Removed some code here, see source file
   
@@ -121,6 +126,7 @@ Because we ran our scraper in headless mode, we didn't save any images or urls t
 Lastly, we ran through each of our genres and appended the entire contents of that .csv to the master sheet.
 
 ```{r}
+genres <- c("Action", "Action-Adventure", "Adventure", "Board Game", "Education", "Fighting", "Misc", "MMO", "Music", "Party", "Platform", "Puzzle", "Racing", "Role-Playing", "Sandbox", "Shooter", "Simulation", "Sports", "Strategy", "Visual Novel")
 master <- tibble()
 for(genre in genres) {
   raw_list <- genre %>% load_add_genre()
@@ -165,21 +171,12 @@ Companies could be represented by multiple names, including some abbreviations o
 Because we wanted to use Publisher data as one of our core facets, we compiled a list of all unique publisher names in our dataset and looked through to see which needed combined.
 
 ```{r}
-publishers_by_sales <- master[, c(3,6,8)]  %>% drop_na() %>%
+publishers_by_sales <- master[, c("Publisher", "Total.Sales")]  %>% drop_na() %>%
   group_by(Publisher) %>% 
   summarize("Sum.Sales" = sum(Total.Sales)) %>% 
   arrange(desc(Sum.Sales))
 
 publishers_by_sales
-```
-
-This required some time for outside research, as we also wanted to include companies that had merged into one publishing entity or those companies which have acquired all assets of another company.
-One example here in the preview is "Electronic Arts" with 1758.69 cumulative sales and "EA Sports" with 1039.99 cumulative sales. These are the same company, so we knew we had to combine them.
-In the interest of keeping the original data available, we made a new column called Publisher.Simple to store this new data.
-
-```{r}
-# Make a column for common publisher names
-master$Publisher.Simple <- master$Publisher %>% clean_names()
 ```
 
 The function `clean_names()` is exceptionally long, as it reduces the size of Publisher names by nearly 200 titles.
@@ -214,6 +211,21 @@ clean_names <- function(names) {
     str_replace_all("D3Publisher", "D3 Publisher") #%>% 
     # Many more companies...   
 }
+```
+
+This required some time for outside research, as we also wanted to include companies that had merged into one publishing entity or those companies which have acquired all assets of another company.
+One example here in the preview is "Electronic Arts" with 1758.69 cumulative sales and "EA Sports" with 1039.99 cumulative sales. These are the same company, so we knew we had to combine them.
+In the interest of keeping the original data available, we made a new column called Publisher.Simple to store this new data.
+
+```{r}
+# Make a column for common publisher names
+master$Publisher.Simple <- master$Publisher %>% clean_names()
+```
+
+```{r}
+#| message: FALSE
+#| echo: FALSE
+load(file = here("data", "wrangled", "wrangled_data.rda"))
 ```
 
 Finally, the last modification to our dataset is to rearrange the column names in a logical order.
@@ -251,44 +263,25 @@ master_without_misc <- master %>% filter(Genre != "Misc")
 
 We also wanted to set up consistent color scales for our genres and consoles to improve the readability and understanding of our graphs.
 ```{r}
-colorscale <- c("Action" = "red",
-                  "Action-Adventure" = "orange",
-                  "Adventure" = "green",
-                  "Board Game" = "brown",
-                  "Education" = "yellow",
-                  "Fighting" = "purple",
-                  "Misc" = "gray",
-                  "MMO" = "blue",
-                  "Music" = "lightblue",
-                  "Party" = "pink",
-                  "Platform" = "turquoise",
-                  "Puzzle" = "lavender",
-                  "Racing" = "darkgreen",
-                  "Role-Playing" = "gold",
-                  "Sandbox" = "beige",
-                  "Shooter" = "black",
-                  "Simulation" = "lightgreen",
-                  "Sports" = "navy",
-                  "Strategy" = "olivedrab",
-                  "Visual Novel" = "magenta")
+colorscale <- c("Action" = "red", "Action-Adventure" = "orange",
+                "Adventure" = "green", "Board Game" = "brown",
+                "Education" = "yellow", "Fighting" = "purple",
+                "Misc" = "gray", "MMO" = "blue", "Music" = "lightblue",
+                "Party" = "pink", "Platform" = "turquoise",
+                "Puzzle" = "lavender", "Racing" = "darkgreen",
+                "Role-Playing" = "gold", "Sandbox" = "beige",
+                "Shooter" = "black", "Simulation" = "lightgreen",
+                "Sports" = "navy", "Strategy" = "olivedrab",
+                "Visual Novel" = "magenta")
 
-console_colorscale <- c("PC" = "darkslategray",
-                    "XB" = "green",
-                    "X360" = "olivedrab2",
-                    "XOne" = "chartreuse3",
-                    "XS" = "darkgreen",
-                    "PS2" = "blue",
-                    "PS3" = "dodgerblue",
-                    "PS4" = "navy",
-                    "PS5" = "purple4",
-                    "PSP" = "purple", 
-                    "DS" = "black",
-                    "3DS" = "brown",
-                    "Wii" = "cyan",
-                    "WiiU" = "cyan3",
-                    "NS" = "red",
-                    "And" = "yellow",
-                    "Mobile" = "orange")
+console_colorscale <- c("PC" = "darkslategray", "XB" = "green",
+                        "X360" = "olivedrab2", "XOne" = "chartreuse3",
+                        "XS" = "darkgreen", "PS2" = "blue",
+                        "PS3" = "dodgerblue", "PS4" = "navy",
+                        "PS5" = "purple4", "PSP" = "purple",
+                        "DS" = "black", "3DS" = "brown",
+                        "Wii" = "cyan", "WiiU" = "cyan3",
+                        "NS" = "red", "And" = "yellow", "Mobile" = "orange")
 ```
 
 Our Publisher By Genre Function allowed us to gather the sales of each genre developed by a single publisher. We would plot this information to see what genres were the highest selling for a certain publisher.
@@ -425,6 +418,29 @@ However, while it may work for them, they have set a high standard by being the 
 
 What if we looked at the Publishers' Most-Produced Genres? To be clear, this is visualizing how many publishers have that genre as their most-produced genre.
 ```{r}
+publishers_by_sales <- master[, c(3,5,8)]  %>% drop_na() %>%
+  group_by(Publisher.Simple) %>% summarize("Sum.Sales" = sum(Total.Sales)) %>% arrange(desc(Sum.Sales))
+
+genre_counter <- data.frame(Sales = integer(), Genre = character(), 
+                            stringsAsFactors = FALSE)
+
+publisher_size <- length(publishers_by_sales$Publisher.Simple)
+
+for(i in 1:publisher_size) {
+  this_pub <- publisher_by_genre(publishers_by_sales$Publisher.Simple[i])
+  genre_counter <- 
+    data.frame(lapply(genre_counter,as.character),stringsAsFactors = FALSE)
+  genre_counter <- 
+    rbind(genre_counter,c(this_pub$Genre[1],
+                          this_pub$Sum.Sales[1]))
+}
+
+colnames(genre_counter) <- c("Genre", "Sales")
+genre_counter %<>% drop_na() %>%
+  group_by(Genre) %>% filter(Genre != "Misc") %>%
+  mutate("count" = n()) %>%
+  .[, c(1,3)] %>% unique()
+
 ggplot(genre_counter, aes(x = reorder(Genre, -count), y = count, fill = Genre)) +
   geom_bar(stat = "identity") + 
   geom_text(aes(label = count), stat = "identity", vjust = -.5, color = "black") +
@@ -443,6 +459,17 @@ Now let's look into the consoles/platforms.
 
 This is a Heat Map of our Most Supported Genre on Each Console. This shows how many games of that genre are being developed on each platform.
 ```{r}
+#| warning = FALSE
+consoles_by_genres <- master %>%
+  group_by(Console, Genre) %>%
+  filter(Console %in% c("XB", "PS2", "DS", "3DS", "Wii", "NS", "PS3", "PS4", "X360", "XOne", "PSP", "WiiU", "And", "Mobile")) %>%
+  filter(Genre != "Misc") %>%
+  summarize(Genre.Amount = n()) %>%
+  arrange(desc(Genre.Amount)) %>%
+  ungroup() %>%
+  complete(Console, Genre, fill = list(Genre.Amount = 0)) %>% 
+  replace_na(list(Genre.Amount = 0))
+
 ggplot(consoles_by_genres, aes(x = Console, y = Genre, fill = Genre.Amount)) +
   geom_tile() +
   theme(panel.grid.major = element_blank(), 
@@ -509,6 +536,7 @@ Once again, we see similar sales by Nintendo, Sony, and Misocrosft with their fi
 
 Let's look into specific publishers and how their console releases affect their sales. We'll start with Nintendo.
 ```{r}
+#| warning = FALSE
 pub_performances_consoles_plot("Nintendo")
 pub_supported_consoles_plot("Nintendo")
 ```
@@ -517,6 +545,7 @@ Nintendo only releases games on consoles that they already own. A major standout
 
 Let's look into Microsoft.
 ```{r}
+#| warning = FALSE
 pub_performances_consoles_plot("Microsoft")
 pub_supported_consoles_plot("Microsoft")
 ```
@@ -525,6 +554,7 @@ This is a less ideal situation than Nintendo. Microsoft releases around the same
 
 Let's look into Sony.
 ```{r}
+#| warning = FALSE
 pub_performances_consoles_plot("Sony")
 pub_supported_consoles_plot("Sony")
 ```
@@ -533,6 +563,7 @@ Sony is also in an interesting situation. Fortunately, it seems closer to Ninten
 
 What about multiplatform publishers? Let's look into Ubisoft.
 ```{r}
+#| warning = FALSE
 pub_performances_consoles_plot("Ubisoft")
 pub_supported_consoles_plot("Ubisoft")
 ```
@@ -566,8 +597,6 @@ The data in this project only represent video games as individual sales units. T
 Because the video game market has skewed toward free-to-play games in recent years, it is possible that some of the statistics for newer or more modern consoles may be less of an accurate representation of the market trends compared to older game sales. One such example could be Fortnite, or other live-service games, which make most of their money from microtransactions and virtual currency sales. This leads Fortnite's publisher, Epic Games, to appear much lower in our rankings compared to how much money the company actually brings in. However, this is simply outside the scope of what we set out to analyze in our project. 
 
 ## Conclusions
-
-![Best Selling Genres](plots/genre_v_publisher/highest_selling_genre.png)
 
 Overall, the video game market currently seems to favor more fast-paced and bombastic experiences compared to slower and more methodical ones. Games that fall into genres such as Action, Adventure, Shooter, and Sports tend to both sell many more copies and as a result have more games produced. This is in direct contrast to slower paced experiences such as Visual Novels, Sandbox, and virtual Board Games. It is possible that fans of the video game industry simply gravitate towards those experiences more, or that similar experiences to Visual Novels and Virtual Board games can be found elsewhere, such as in literary novels and physical board games, respectively. 
 
