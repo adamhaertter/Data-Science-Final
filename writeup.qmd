@@ -244,6 +244,94 @@ source("scripts/wrangle_data.R")
 See [wrangle_data.R](scripts/wrangle_data.R).
 
 # Defining Functions
+Our Publisher By Genre Function allowed us to gather the sales of each genre developed by a single publisher. We would plot this information to see what genres were the highest selling for a certain publisher.
+```{r}
+publisher_by_genre <- function(publisher) {
+  master[, c(3,4,5,8)] %>%
+  filter(Console != "Series" & Console != "All" & Publisher.Simple == publisher & Genre != "Misc") %>%
+  drop_na() %>%
+  group_by(Genre) %>% summarize("Sum.Sales" = sum(Total.Sales)) %>% arrange(desc(Sum.Sales))
+}
+```
+
+The Sales By Genre Plot takes in a publisher and, using the previous function, plots the sales of each genre that the publisher develops from high to low.
+```{r}
+sales_by_genre_plot <- function(publisher) {
+  ggplot(publisher_by_genre(publisher), aes(x = reorder(Genre, -Sum.Sales), y = Sum.Sales, fill = Genre)) + geom_bar(stat = "identity", position = position_dodge()) + theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) + labs(x = "Genre", y = "Sales", title = paste(publisher, "Sales By Genre")) + scale_fill_manual(values = colorscale, guide = "none")
+}
+```
+
+The Save Genre Plot allowed us to save the plot that was created from the previous functions as an image to be used for our presentation.
+```{r}
+save_genre_plot <- function(publisher) {
+  savable <- sales_by_genre_plot(publisher)
+  publisher %<>% tolower() %>% str_replace_all(" ", "_")
+  save(savable, file = here("plots", "genre_v_publisher", paste(publisher, "_sales_by_genre.rda", sep = "")))
+  ggsave(here("plots", "genre_v_publisher", paste(publisher, "_sales_by_genre.png", sep = "")))
+  savable
+}
+```
+
+The Console Performance by Publisher function is similar to the Publisher by Genre function. It takes in a publisher's name and gets the total sales made on each platform from that publisher.
+```{r}
+console_performances_by_publisher <- function(publisher) {
+  master[, c(3,4,5,8)] %>%
+  filter(Console %in% c("PC", "XB", "PS2", "DS", "3DS", "Wii", "NS", "PS3", "PS4", "PS5", "X360", "XOne", "XS", "PSP", "WiiU", "And", "Mobile") & Publisher.Simple == publisher) %>%
+  drop_na() %>%
+  group_by(Console) %>%
+    summarize(Console.Sales = sum(Total.Sales))
+}
+```
+
+The Publisher Performances Consoles Plot is similar to the Sales By Genre Plot as it plots out the results of the previous function. This allows the audience to see how many sales were made for each platform by a specific publisher.
+```{r}
+pub_performances_consoles_plot <- function(publisher) {
+  ggplot(console_performances_by_publisher(publisher), aes(x = reorder(Console, -Console.Sales), y = Console.Sales, fill = Console)) + geom_bar(stat = "identity", position = position_dodge()) + theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) + labs(x = "Console", y = "Sales", title = paste(publisher, " Sales By Console")) + scale_fill_discrete(guide="none") + scale_fill_manual(values = console_colorscale, guide = "none")
+}
+```
+
+The Save Publisher Performance allows us to save pngs of the plots from the previous function to be used in the presentation.
+```{r}
+save_pub_performance <- function(publisher) {
+  pub_performances_consoles_plot(publisher)
+  publisher %<>% tolower() %>% str_replace_all(" ", "_")
+  save(savable, file = here("plots", "console_v_sales", paste(publisher, "_sales_by_console.rda", sep = "")))
+  ggsave(here("plots", "console_v_sales", paste(publisher, "_sales_by_console.png", sep = "")))
+  savable
+}
+```
+
+Console Releases By Publisher function ignores sales numbers by taking in a publisher and solely getting the amount of game releases on each platform that they developed.
+```{r}
+console_releases_by_publisher <- function(publisher) {
+  master[, c(3,4,5,8)] %>%
+  filter(Console %in% c("PC", "XB", "PS2", "DS", "3DS", "Wii", "NS", "PS3", "PS4", "PS5", "X360", "XOne", "XS", "PSP", "WiiU", "And", "Mobile") & Publisher.Simple == publisher) %>%
+  drop_na() %>%
+  group_by(Console) %>%
+    summarize(Releases = n())
+}
+```
+
+The Publisher Supported Consoles Plot function takes the results from the previous function and plots them. This allows us to visually see how many game releases a publisher developed for certain platforms.
+```{r}
+pub_supported_consoles_plot <- function(publisher) {
+  ggplot(console_releases_by_publisher(publisher), aes(x = reorder(Console, -Releases), y = Releases, fill = Console)) + geom_bar(stat = "identity", position = position_dodge()) + theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) + labs(x = "Console", y = "Releases", title = paste(publisher, " Releases By Console")) + scale_fill_discrete(guide="none") + scale_fill_manual(values = console_colorscale, guide = "none")
+}
+```
+
+The Save Publisher Supported function allows us to save the plot from the previous function into a png for us to use in the presentation.
+```{r}
+save_pub_supported <- function(publisher){
+  pub_supported_consoles_plot(publisher)
+  publisher %<>% tolower() %>% str_replace_all(" ", "_")
+  save(savable, file = here("plots", "console_v_release", paste(publisher, "_releases_by_console.rda", sep = "")))
+  ggsave(here("plots", "console_v_release", paste(publisher, "_releases_by_console.png", sep = "")))
+  savable
+}
+```
 
 # Analysis
 
