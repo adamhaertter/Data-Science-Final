@@ -249,6 +249,48 @@ We realized that the "most popular" developed genre was Miscellaneous according 
 master_without_misc <- master %>% filter(Genre != "Misc")
 ```
 
+We also wanted to set up consistent color scales for our genres and consoles to improve the readability and understanding of our graphs.
+```{r}
+colorscale <- c("Action" = "red",
+                  "Action-Adventure" = "orange",
+                  "Adventure" = "green",
+                  "Board Game" = "brown",
+                  "Education" = "yellow",
+                  "Fighting" = "purple",
+                  "Misc" = "gray",
+                  "MMO" = "blue",
+                  "Music" = "lightblue",
+                  "Party" = "pink",
+                  "Platform" = "turquoise",
+                  "Puzzle" = "lavender",
+                  "Racing" = "darkgreen",
+                  "Role-Playing" = "gold",
+                  "Sandbox" = "beige",
+                  "Shooter" = "black",
+                  "Simulation" = "lightgreen",
+                  "Sports" = "navy",
+                  "Strategy" = "olivedrab",
+                  "Visual Novel" = "magenta")
+
+console_colorscale <- c("PC" = "darkslategray",
+                    "XB" = "green",
+                    "X360" = "olivedrab2",
+                    "XOne" = "chartreuse3",
+                    "XS" = "darkgreen",
+                    "PS2" = "blue",
+                    "PS3" = "dodgerblue",
+                    "PS4" = "navy",
+                    "PS5" = "purple4",
+                    "PSP" = "purple", 
+                    "DS" = "black",
+                    "3DS" = "brown",
+                    "Wii" = "cyan",
+                    "WiiU" = "cyan3",
+                    "NS" = "red",
+                    "And" = "yellow",
+                    "Mobile" = "orange")
+```
+
 Our Publisher By Genre Function allowed us to gather the sales of each genre developed by a single publisher. We would plot this information to see what genres were the highest selling for a certain publisher.
 ```{r}
 publisher_by_genre <- function(publisher) {
@@ -345,29 +387,157 @@ For example, we used this plot to visualize the most popular genres based on how
 ```{r}
 popular_genres_data <- as.data.frame(sort(table(master_without_misc$Genre)), decreasing = TRUE)
 
-savable <- ggplot(popular_genres_data, aes(x = reorder(Var1, -Freq), y = Freq, fill = Var1)) +
+ggplot(popular_genres_data, aes(x = reorder(Var1, -Freq), y = Freq, fill = Var1)) +
   geom_bar(stat = "identity") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
   labs(x = "Genre", y = "Games Published", title = "Most Popular Genres") + 
   scale_fill_manual(values = colorscale, guide = "none")
-save(savable, file = here("plots", "genre_v_publisher", "most_popular_genre.rda"))
-
-# Saving the plot after creating it
-ggsave(here("plots", "genre_v_publisher", "most_popular_genre.png"))
 ```
+
+Action appears to be the most developed genre out of any other genre. It is important to note just how many of the more supported genres are faster paced and exciting experiences compared to the slower paced experiences of education games or visual novels.
 
 With Genres By Sales, we calculated what was the best selling genre. This allows the audience to see what genres are making the most money and comparing it to other graphs to see if if publishers should steer towards what is making more profit.
 ```{r}
 genres_by_sales <- master_without_misc[, c(3,4,5,8)]  %>% drop_na() %>%
   group_by(Genre) %>% summarize("Sum.Sales" = sum(Total.Sales)) %>% arrange(desc(Sum.Sales))
 
-savable <- ggplot(genres_by_sales, aes(x = reorder(Genre, -Sum.Sales), y = Sum.Sales, fill = Genre)) +
+ggplot(genres_by_sales, aes(x = reorder(Genre, -Sum.Sales), y = Sum.Sales, fill = Genre)) +
   geom_bar(stat = "identity") + theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
   labs(x = "Genre", y = "Sales", title = "Highest Selling Genres") +
   scale_fill_manual(values = colorscale, guide = "none")
-save(savable, file = here("plots", "genre_v_publisher", "highest_selling_genre.rda"))
-ggsave(here("plots", "genre_v_publisher", "highest_selling_genre.png"))
 ```
-## Findings
+
+As you can see, Action-Adventure is the Highest Selling Genre. Most of the genres generally follow a similar trend to the most developed. VGChartz seems to make a distinction between Action-Adventure, Action, and Adventure Genres. Generally, despite Action-Adventure being labelled differently from the Action genre in the previous graph, it is safe to assume that both Action and Adventure games are typically most profitable.
+
+Now let's call the previous functions for the Top 5 Publishers in Game Sales
+```{r}
+sales_by_genre_plot("Nintendo")
+sales_by_genre_plot("Electronic Arts")
+sales_by_genre_plot("Activision")
+sales_by_genre_plot("Sony")
+sales_by_genre_plot("Ubisoft")
+```
+
+People who are familiar with the game industry can easily understand why each of these developers has made the most in certain genres. For example, Nintendo has the Mario franchise which is mostly made up of platformer games, their highest selling genre.
+
+key factor of these is to compare them to the highest selling genres of the industry as a whole. While Ubisoft and Sony both have Action, the best selling genre, as their own highest selling genre, the top 3 do not. Nintendo has platformer, Electronic Arts has sports, and Activision has shooter. It seems that some publishers are able to break the mold and make an enormous amount of money by being known for certain IPs.
+
+However, while it may work for them, they have set a high standard by being the best at the genre they specialize in. Publishers may want to play it safe by sticking to the genres that make the most money overall rather than trying to mimick the success of those who are far bigger than them.
+
+What if we looked at the Publishers' Most-Produced Genres? To be clear, this is visualizing how many publishers have that genre as their most-produced genre.
+```{r}
+ggplot(genre_counter, aes(x = reorder(Genre, -count), y = count, fill = Genre)) +
+  geom_bar(stat = "identity") + 
+  geom_text(aes(label = count), stat = "identity", vjust = -.5, color = "black") +
+  scale_y_continuous(limits = c(0, 150)) +
+  theme(plot.title = element_text(hjust = 0.5), 
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(x = "Genre", 
+       y = "Number of Publishers", 
+       title = "Publishers' Most-Produced Genres") +
+  scale_fill_manual(values = colorscale, guide = "none")
+```
+
+This is very similar to our previous graph on the Most Popular Genres. However, the third Publisher's favorite is Simulation. This is curious as Simulation is hardly that high in the Most Popular Genres. If there are not many games being produced or selling in that genre, this is likely due to a large amount of indie developers who have Simulation as their only genre that they have developed.
+
+Now let's look into the consoles/platforms.
+
+This is a Heat Map of our Most Supported Genre on Each Console. This shows how many games of that genre are being developed on each platform.
+```{r}
+ggplot(consoles_by_genres, aes(x = Console, y = Genre, fill = Genre.Amount)) +
+  geom_tile() +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  scale_fill_gradient2(low = "white", mid = "green", high = "darkgreen", midpoint = 250) +
+  labs(x = "Consoles", 
+       y = "Genres", 
+       fill = "Genres", 
+       title = "Heatmap of Most Supported Genre on Each Console")
+```
+
+The darker that an area is, the more games have been developed for that console. Similarly to our previous graphs, Action is clearly the most developed overall as it has the darkest line on our heat map. Playstation 2 also has the most developed games in many genres such as Adventure and Sports. It is interesting that so many games would be developed for earlier consoles and for that number to not carry over into the newer ones in that genre.
+
+Now let's look at how many are sold by each of our biggest publishers on eac platform.
+```{r}
+console_by_publisher_sales <- master %>% 
+  group_by(Console, Publisher.Simple) %>% .[, c("Console", "Publisher.Simple", "Total.Sales")] %>%
+  drop_na() %>% 
+  filter(Publisher.Simple %in% c("Nintendo", "Electronic Arts", "Activision Blizzard", "Sony", "Ubisoft", "Bandai Namco", "THQ", "Sega", "Square Enix", "Konami", "Microsoft", "Capcom", "Rockstar Games", "Warner Bros", "2K Games")) %>% # Top 15 publishers
+  filter(Console %in% c("PC", "XB", "PS2", "DS", "3DS", "Wii", "NS", "PS3", "PS4", "PS5", "X360", "XOne", "XS", "PSP", "WiiU", "And", "Mobile")) %>%
+  summarize("Sum.Sales" = sum(Total.Sales), .groups = "drop") %>% ungroup() %>% complete(Console, Publisher.Simple, fill = list(Sum.Sales = 0)) %>% 
+  replace_na(list(Sum.Sales = 0))
+
+ggplot(console_by_publisher_sales, aes(x = Console, y = Publisher.Simple, fill = Sum.Sales)) +
+  geom_tile() +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  scale_fill_gradient2(low = "white", mid = "magenta", high = "purple", midpoint = 225, na.value = "white") +
+  labs(x = "Console", 
+       y = "Publisher", 
+       fill = "Total Sales", 
+       title = "Heatmap of Best-Performing Console Releases by Publisher")
+```
+
+As to be expected, companies like Nintendo who create new consoles will mainly release games on their own consoles. This helps increase the demand for that console. The same works for Sony on Playstation and Microsoft on Xbox. Curiously, Electronic Arts also produces almost just as many as Sony and Xbox on their own platforms. This is because EA is a multiplatform developer and is not restricted to any specific one. This may be a big reason why they are the second biggest game company in sales.
+
+Now let's look at how many sales each of the publishers gets on each platform.
+```{r}
+consoles_by_publisher <- master %>%
+  group_by(Console, Publisher.Simple) %>%
+  filter(Console %in% c("PC", "XB", "PS2", "DS", "3DS", "Wii", "NS", "PS3", "PS4", "PS5", "X360", "XOne", "XS", "PSP", "WiiU", "And", "Mobile")) %>%
+  filter(Publisher.Simple %in% c("Nintendo", "Electronic Arts", "Activision Blizzard", "Sony", "Ubisoft", "Bandai Namco", "THQ", "Sega", "Square Enix", "Konami", "Microsoft", "Capcom", "Rockstar Games", "Warner Bros", "2K Games")) %>% # Top 15 publishers
+  summarize(Releases = n()) %>%
+  arrange(desc(Releases)) %>%
+  ungroup() %>%
+  complete(Console, Publisher.Simple, fill = list(Releases = 0)) %>% 
+  replace_na(list(Releases = 0))
+
+ggplot(consoles_by_publisher, aes(x = Console, y = Publisher.Simple, fill = Releases)) +
+  geom_tile() +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  scale_fill_gradient2(low = "white", mid = "orange", high = "red", midpoint = 250) + 
+  labs(x = "Consoles", 
+       y = "Publishers", 
+       fill = "Game Releases", 
+       title = "Heatmap of Most Supported Consoles by Each Publisher")
+```
+
+Once again, we see similar sales by Nintendo, Sony, and Misocrosft with their first part exclusives. Electronic Arts and Activision Blizzard and Ubisoft seem to be dominating the PC platform. Unfortunately, we do not have as much data on the PS5 and Xbox Series X as they are newer consoles and VGChartz hasn't gathered enough yet.
+
+Let's look into specific publishers and how their console releases affect their sales. We'll start with Nintendo.
+```{r}
+pub_performances_consoles_plot("Nintendo")
+pub_supported_consoles_plot("Nintendo")
+```
+
+Nintendo only releases games on consoles that they already own. A major standout is that Nintendo has not released that many games on the Nintendo Switch and yet, the Switch has their highest game sales ever. This is the perfect situation to be in as they do not have to put in as much effort into their Switch releases and yet still make a large amount of money from sales. Unfortunately, the WiiU was a commercial failure and thus they did not release or sell many gmaes on that platform.
+
+Let's look into Microsoft.
+```{r}
+pub_performances_consoles_plot("Microsoft")
+pub_supported_consoles_plot("Microsoft")
+```
+
+This is a less ideal situation than Nintendo. Microsoft releases around the same amount of games for their generations of consoles, outside of the Xbox One. However, they still have not been able to compete with their Xbox 360 sales. This is extremely concerning because they are not making nearly as much as they used to during the 360 era. Microsoft has been releasing more games on PC than they used to as they have become less exclusive. However, those sales are also meager compared to the releases. They need to look into what their model was during the 360 era if they want to be able to reach those heights again. Something had changed for the worse according to this data.
+
+Let's look into Sony.
+```{r}
+pub_performances_consoles_plot("Sony")
+pub_supported_consoles_plot("Sony")
+```
+
+Sony is also in an interesting situation. Fortunately, it seems closer to Nintendo's situation. They are making around the same amount of sales on games for each console, but they are making less and less releases with each generation. If they wanted to make even more profit, it seems that the value of their individual releases has gone up so they could possibly make even more if they released more games. This all depends on if the effort is worth the value.
+
+What about multiplatform publishers? Let's look into Ubisoft.
+```{r}
+pub_performances_consoles_plot("Ubisoft")
+pub_supported_consoles_plot("Ubisoft")
+```
+
+Making games on multiple platforms means that Ubisoft is not restricted to any one line of platforms. They seemed to release most of their games on PC and DS, but make the most during the Wii, 360, and PS3 era. Interestingly, if you ignore the DS and PC part of their releases, their releases mirror their sales. The question arises about why they are not making as many games as they used to during the previous era. It seems less like an issue of the quality of their games currently and more that they have not released as many games as they used to. Another detail is that their least developed platform is the Nintendo Switch out of the most recent consoles. As we saw with Nintendo's sales, the Switch performs very well at selling. Ubisoft could continue their streak of selling less games than they used to, but just making more ports to the Nintendo Switch.
 
 ## Limitations 
 
