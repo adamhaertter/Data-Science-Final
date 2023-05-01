@@ -369,7 +369,31 @@ ggsave(here("plots", "genre_v_publisher", "highest_selling_genre.png"))
 ```
 ## Findings
 
-## Limitations
+## Limitations 
+
+There are a few limitations that we need to mention about our dataset and the overall scope of this project.
+
+#### Outdated Data
+
+It is very possible that some of the data used in this project may be outdated or a poor representation of the market. Most sales data on video games are not public information, and are only released by the publishers themselves in press releases and investor meetings. Additionally, companies are often more hesitant to release sales statistics for poorly performing games compared to those that are breakout hits. As a result, some games may not have sales data that is up to date entirely.
+
+Additionally, this only covers the firsthand video game sales market. Games for older systems are not being produced officially anymore. For example, games for the Nintendo DS are not in production anymore, and any purchases for video games for these systems now are all part of a secondhand aftermarket for video games. Therefore, buying a Nintendo DS game in 2023 would not affect these sales numbers, while games for systems such as the Playstation 5 or Nintendo Switch could be getting new sales in the primary market every day. This is simply a limitation of the market data as a whole and using VGChartz for our data source.
+
+#### Newly Released Systems
+
+Sales data for systems like the Playstation 5 and Xbox Series X are very sparse at this point in time. These consoles are fairly new in terms of release, and therefore are still getting new sales all the time. As a result, these companies have not reported that sales data as much as older systems. It is possible that these systems are just too new for solid, statistically significant data to be collected on them at this point in time.
+
+#### Genres on VGChartz
+
+All of our genre data comes from VGChartz themselves, but sometimes video game genre can be subjective. All claims about genre in this project come from how VGChartz chooses to label genres and sort games. There is no personal influence on that from us whatsoever. We do remove `Misc` as a genre from most of our genre-related calculations, however, just because of how broad of a category it is.
+
+Some games can be defined by multiple genres or try to subvert genres as a whole. Perhaps in a future project or with a smaller dataset, genre can be better represented for more specific niches. However, we do believe that the genres used in this project are descriptive enough for our intentions and analysis. It is important that we disclose this due to the subjective nature of genre in all mediums of entertainment, not only video games.
+
+#### Games as Sales Units
+
+The data in this project only represent video games as individual sales units. This does not account for games with microtransactions, the download rates of free-to-play or free-to-start games, or the nature of DLC (downloadable content) expansions for already existing games. Again, this is a limitation of using VGChartz' database for our analysis rather than anything to do with our own tidying or messing with the data.
+
+Because the video game market has skewed toward free-to-play games in recent years, it is possible that some of the statistics for newer or more modern consoles may be less of an accurate representation of the market trends compared to older game sales. One such example could be Fortnite, or other live-service games, which make most of their money from microtransactions and virtual currency sales. This leads Fortnite's publisher, Epic Games, to appear much lower in our rankings compared to how much money the company actually brings in. However, this is simply outside the scope of what we set out to analyze in our project. 
 
 ## Conclusions
 
